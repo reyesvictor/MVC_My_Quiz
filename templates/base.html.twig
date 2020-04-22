@@ -1,12 +1,27 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </body>
+<html lang='en'>
+	<head>
+		<meta charset='UTF-8'>
+		<meta name http-equiv='X-UA-Compatible' content='ie=edge'>
+		<meta
+		name='viewport' content='width=device-width, initial-scale=1.0'>
+		{# <title>Project | Welcome</title> #}
+		<meta name='description' content='Welcome Page'>
+		<meta name='keywords' content=''>
+		<meta name='copyright' content=''>
+		<meta name='author' content='Victor Reyes'>
+		<link rel='stylesheet' type='text/css' href='/css/bootstrap.min.css' media='screen'/>
+
+		<title>
+			{% block title %}Welcome!
+			{% endblock %}
+		</title>
+		{% block stylesheets %}{% endblock %}
+	</head>
+
+	<body>
+		{% block header %}{% endblock %}
+		{% block body %}{% endblock %}
+		{% block footer %}{% endblock %}
+	</body>
 </html>

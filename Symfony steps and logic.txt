@@ -1,0 +1,83 @@
+Symfony
+installer meme si jai limpression que ca sert a rien
+ wget https://get.symfony.com/cli/installer -O - | bash
+
+copier cette ligne dans le zshrc 
+
+créer projet
+composer create-project symfony/skeleton myquiz
+ou
+composer create-project symfony/website-skeleton myquiz
+
+FAIRE UN BACKUP DE PHP.INI de XAMPP
+
+mettre a jour composer
+composer update && composer global require symfony/thanks && composer thanks
+
+
+TUTO
+
+code .
+pour lancer visual studio code dans le bash (faut se trouver dans le dossier a ouvrir)
+
+installer bundle pour creer controller
+composer require symfony/maker-bundle --dev
+
+
+modifier .env -> infos xampp
+créer bdd
+php bin/console doctrine:database:create
+créer entités
+php bin/console make:entity
+liste des types 
+https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html
+
+===================BDD Plan===========================
+
+USERS
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | varchar(255)        | NO   |     | NULL    |                |
+| email             | varchar(255)        | NO   | UNI | NULL    |                |
+| email_verified_at | timestamp           | YES  |     | NULL    |                |
+  is_admin          | tinyint             | NO => defaut 0
+| password          | varchar(255)        | NO   |     | NULL    |                |
+| remember_token    | varchar(100)        | YES  |     | NULL    |                |
+| created_at        | timestamp           | YES  |     | NULL    |                |
+| updated_at        | timestamp           | YES  |     | NULL    |                |
+| last_connected_at | timestamp           | YES  |     | NULL    |                |
+
+QUIZ
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | varchar(255)        | NO   |     | NULL    |                |
+| category          | bigint(20) unsigned | NO   | UNI | NULL    |                |
+| correct_answer    | varchar(255)           | YES  |     | NULL    |                |
+| answers           | varchar(255)        | NO   |     | NULL    |                |
+| created_at        | timestamp           | YES  |     | NULL    |                |
+| updated_at        | timestamp           | YES  |     | NULL    |                |
+
+CATEGORY
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | varchar(255)        | NO   |     | NULL    |                |
+| sub_category      | bigint(20) unsigned | NO   | UNI | NULL    |                |
+| created_at        | timestamp           | YES  |     | NULL    |                |
+| updated_at        | timestamp           | YES  |     | NULL    |                |
+  
+HISTORIC
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| user_id           | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| quiz_id           | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| created_at        | timestamp           | YES  |     | NULL    |                |
+//trouver le moyen de stocker un array pour les reponses
+// et pour les reponses des users (genre 0/1 pour false/true et savoir ou il a mal/bien répondu)

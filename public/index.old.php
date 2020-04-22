@@ -27,5 +27,3 @@ $response->send();
 $kernel->terminate($request, $response);
 
 //Je suis en train de regarder des tutoriels donc pas de code pour aujourdh'ui surtout de la compréhension
-
-
