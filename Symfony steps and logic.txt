@@ -15,7 +15,7 @@ mettre a jour composer
 composer update && composer global require symfony/thanks && composer thanks
 
 
-TUTO
+=======================
 
 code .
 pour lancer visual studio code dans le bash (faut se trouver dans le dossier a ouvrir)
@@ -24,11 +24,41 @@ installer bundle pour creer controller
 composer require symfony/maker-bundle --dev
 
 
+=============Creation BDD=================
 modifier .env -> infos xampp
 créer bdd
 php bin/console doctrine:database:create
+
 créer entités
-php bin/console make:entity
+php bin/console make:entity Nom
+créer les requetes sql
+php bin/console make:migration
+executer les requetes sql
+php bin/console doctrine:migrations:migrate
+============================================
+
+=============Creation données===============
+mettre a jour composer orm pour créer des fixtures (dummy data) ==> crée le dossier data_fixtures
+composer require orm-fixtures --dev
+créer une fixture
+php bin/console make:fixtures
+load a fixture after coding inside
+php bin/console doctrine:fixtures:load
+============================================
+================Modules==============
+composer require cocur/slugify
+composer require gedmo/doctrine-extensions
+to get timestampable
+ composer require stof/doctrine-extensions-bundle
+ https://symfony.com/doc/master/bundles/StofDoctrineExtensionsBundle/installation.html
+ https://symfonycasts.com/screencast/symfony-doctrine/timestampable
+============================================
+
+Entité (champs, specification des relations) -> Migration (version2020....) -> Migrate (sqlexecute) -> Fixture (dummy data)
+cycle de vie des entités
+https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/events.html
+
+
 liste des types 
 https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html
 
@@ -40,26 +70,15 @@ USERS
 +-------------------+---------------------+------+-----+---------+----------------+
 | id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
 | name              | varchar(255)        | NO   |     | NULL    |                |
+| slug              | text                | NO   |     | NULL    |                |
 | email             | varchar(255)        | NO   | UNI | NULL    |                |
 | email_verified_at | timestamp           | YES  |     | NULL    |                |
-  is_admin          | tinyint             | NO => defaut 0
+| is_admin          | tinyint             | NO => defaut 0
 | password          | varchar(255)        | NO   |     | NULL    |                |
 | remember_token    | varchar(100)        | YES  |     | NULL    |                |
 | created_at        | timestamp           | YES  |     | NULL    |                |
 | updated_at        | timestamp           | YES  |     | NULL    |                |
 | last_connected_at | timestamp           | YES  |     | NULL    |                |
-
-QUIZ
-+-------------------+---------------------+------+-----+---------+----------------+
-| Field             | Type                | Null | Key | Default | Extra          |
-+-------------------+---------------------+------+-----+---------+----------------+
-| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
-| name              | varchar(255)        | NO   |     | NULL    |                |
-| category          | bigint(20) unsigned | NO   | UNI | NULL    |                |
-| correct_answer    | varchar(255)           | YES  |     | NULL    |                |
-| answers           | varchar(255)        | NO   |     | NULL    |                |
-| created_at        | timestamp           | YES  |     | NULL    |                |
-| updated_at        | timestamp           | YES  |     | NULL    |                |
 
 CATEGORY
 +-------------------+---------------------+------+-----+---------+----------------+
@@ -67,10 +86,25 @@ CATEGORY
 +-------------------+---------------------+------+-----+---------+----------------+
 | id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
 | name              | varchar(255)        | NO   |     | NULL    |                |
+| slug              | text                | NO   |     | NULL    |                |
 | sub_category      | bigint(20) unsigned | NO   | UNI | NULL    |                |
 | created_at        | timestamp           | YES  |     | NULL    |                |
 | updated_at        | timestamp           | YES  |     | NULL    |                |
-  
+
+
+QUIZ
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | text                | NO   |     | NULL    |                |
+| slug              | text                | NO   |     | NULL    |                |
+| category          | bigint(20) unsigned | NO   | UNI | NULL    |                |
+| data              | array_assos [question => [reponses => true/false]]              | NO   |     | NULL    |                |
+| created_at        | timestamp           | YES  |     | NULL    |                |
+| updated_at        | timestamp           | YES  |     | NULL    |                |
+
+
 HISTORIC
 +-------------------+---------------------+------+-----+---------+----------------+
 | Field             | Type                | Null | Key | Default | Extra          |
@@ -78,6 +112,7 @@ HISTORIC
 | id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
 | user_id           | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
 | quiz_id           | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| answers           | arrayassociatif [question => [reponse => [ 'state' => 'true/false','answer' => 'blabla']]]  | YES  |     | NULL    |                |
+| score             | int(9 )             | YES  |     | NULL    |                |
+| succeeded         | tinyint             | YES  |     | NULL    |                |
 | created_at        | timestamp           | YES  |     | NULL    |                |
-//trouver le moyen de stocker un array pour les reponses
-// et pour les reponses des users (genre 0/1 pour false/true et savoir ou il a mal/bien répondu)
