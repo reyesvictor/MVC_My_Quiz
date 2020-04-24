@@ -137,3 +137,44 @@ HISTORIC
 | score             | int(9 )             | YES  |     | NULL    |                |
 | succeeded         | tinyint             | YES  |     | NULL    |                |
 | created_at        | timestamp           | YES  |     | NULL    |                |
+
+
+
+====Commencement de l'affichage + Formulaire===================
+mettre a jour 
+composer require sensio/generator-bundle
+creer controller
+php bin/console generate:controller
+
+Error' There are no commands defined in the "generate:doctrine" namespace.'
+php bin/console container:debug
+donne 'There are no commands defined in the "container" namespace.'
+jai fait ca 
+php bin/console debug:container
+ca me donne une liste, pas utile
+
+je tente 
+composer require symfony/framework-bundle
+ca met a jour un truc
+je retente
+composer require sensio/generator-bundle
+
+symfony et sa doc de merde
+
+ici
+https://www.youtube.com/watch?v=Br4i90xhCoI
+=================create crud controller================
+php bin/console make:crud
+=======================================================
+ca marche !!! youpi
+
+installation
+composer require --dev symfony/var-dumper
+pour faire des vardump avec dump()
+
+reinstallation de doctrine car findAll et getDoctrine ne marchent pas
+ composer require symfony/orm-pack
+ composer require --dev symfony/maker-bundle
+
+suivi cest etapes pour faire une requete dans le QuizType
+https://symfony.com/doc/4.1/form/form_dependencies.html
