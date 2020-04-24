@@ -35,6 +35,11 @@ créer les requetes sql
 php bin/console make:migration
 executer les requetes sql
 php bin/console doctrine:migrations:migrate
+
+--
+php bin/console doctrine:database:create && php bin/console make:migration && php bin/console doctrine:migrations:migrate && php bin/console doctrine:fixtures:load
+--
+
 ============================================
 
 =============Creation données===============
@@ -99,11 +104,27 @@ QUIZ
 | id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
 | name              | text                | NO   |     | NULL    |                |
 | slug              | text                | NO   |     | NULL    |                |
-| category          | bigint(20) unsigned | NO   | UNI | NULL    |                |
+| category_id          | bigint(20) unsigned | NO   | UNI | NULL    |                |
 | data              | array_assos [question => [reponses => true/false]]              | NO   |     | NULL    |                |
 | created_at        | timestamp           | YES  |     | NULL    |                |
 | updated_at        | timestamp           | YES  |     | NULL    |                |
 
+QUESTION
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | text                | NO   |     | NULL    |                |
+| quiz_id          | bigint(20) unsigned | NO   | UNI | NULL    |                |
+
+ANSWER
++-------------------+---------------------+------+-----+---------+----------------+
+| Field             | Type                | Null | Key | Default | Extra          |
++-------------------+---------------------+------+-----+---------+----------------+
+| id                | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| name              | text                | NO   |     | NULL    |                |
+| question_id       | bigint(20) unsigned | NO   | UNI | NULL    |                |
+| is_correct        | tinyint             | NO => defaut 0
 
 HISTORIC
 +-------------------+---------------------+------+-----+---------+----------------+

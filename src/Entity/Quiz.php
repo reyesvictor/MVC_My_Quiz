@@ -37,9 +37,9 @@ class Quiz
     private $category;
 
     /**
-     * @ORM\Column(type="array")
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $data = [];
+    private $data;
 
     /**
      * @ORM\Column(type="datetime")
@@ -56,9 +56,15 @@ class Quiz
      */
     private $historics;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz_id", orphanRemoval=true)
+     */
+    private $questions;
+
     public function __construct()
     {
         $this->historics = new ArrayCollection();
+        $this->questions = new ArrayCollection();
     }
 
     /**
@@ -117,12 +123,12 @@ class Quiz
         return $this;
     }
 
-    public function getData(): ?array
+    public function getData(): ?string
     {
         return $this->data;
     }
 
-    public function setData(array $data): self
+    public function setData(string $data): self
     {
         $this->data = $data;
 
@@ -187,6 +193,37 @@ class Quiz
             // set the owning side to null (unless already changed)
             if ($historic->getQuizId() === $this) {
                 $historic->setQuizId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Question[]
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    public function addQuestion(Question $question): self
+    {
+        if (!$this->questions->contains($question)) {
+            $this->questions[] = $question;
+            $question->setQuizId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuestion(Question $question): self
+    {
+        if ($this->questions->contains($question)) {
+            $this->questions->removeElement($question);
+            // set the owning side to null (unless already changed)
+            if ($question->getQuizId() === $this) {
+                $question->setQuizId(null);
             }
         }
 

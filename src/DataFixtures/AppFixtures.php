@@ -4,7 +4,9 @@ namespace App\DataFixtures;
 
 use App\Entity\Quiz;
 use App\Entity\User;
+use App\Entity\Answer;
 use App\Entity\Category;
+use App\Entity\Question;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType as DateTimeType;
@@ -16,44 +18,90 @@ class AppFixtures extends Fixture
         // $product = new Product();
         // $manager->persist($product);
 
-        $cat_arr = [
-            'Harry Potter' => [
-                'Dans la partie d’échec Harry Potter prend la place de :' => [
-                    'Un fou' => true,
-                    'Une tour' => false,
-                    'Un pion' => false,
-                ]
+        $arr = [
+
+            //refaire tout
+            //dabord une cateogie FILM
+            //dans film on met un quiz harry potter
+            //dans ce quiz on met plusieurs questions
+            //dans ces questions on met plusieurs reponses
+            //donc il faut que je crée une entity question
+            //avec une relation onetomany Question->Quiz
+            //et une entity reponse avec un tinyint
+            //relation onetomany Answer->Question
+            //ou tout foutre dans un tableau MDR
+
+            //Categorie => [
+            //     Quiz => [
+            //         Question => [
+            //             reponses => true/false
+            //         ]
+            //     ]
+            // ]
+            'Films' => [
+                'Harry Potter' => [
+                    'Dans la partie d’échec Harry Potter prend la place de :' => [
+                        'Un fou' => true,
+                        'Une tour' => false,
+                        'Un pion' => false,
+                    ],
+                    'Quel est le mot de passe du bureau de Dumbledore ?' => [
+                        'Chocogrenouille' => false,
+                        'Sorbet Citron' => true,
+                        'Dragées Surprise' => false,
+                    ]
+                ],
             ],
-            'Sigles Français',
-            'Définitions de mots',
-            'Les spécialités culinaires',
-            'Séries TV : Les Simpson - partie 1',
-            'Séries TV : Les Simpson - partie 2',
-            'Séries TV : Stargate SG1',
-            'Séries TV : NCIS',
-            'Jeux de société',
-            'Programmation',
-            'Sigles Informatiques',
+            'Sigles' => [
+                'Sigles Français' => [
+                    'Que signifie CROUS ?' => [
+                        "Centre de Restauration et d'Organisation Universitaire et Secondaire" => false,
+                        "Comité Régional pour l'Organisation Universitaire et Scolaire" => false,
+                        "Centre Régional des Oeuvres Universitaires et Scolaires" => true,
+                    ]
+                ]
+            ]
+            // 'Définitions de mots',
+            // 'Les spécialités culinaires',
+            // 'Séries TV : Les Simpson - partie 1',
+            // 'Séries TV : Les Simpson - partie 2',
+            // 'Séries TV : Stargate SG1',
+            // 'Séries TV : NCIS',
+            // 'Jeux de société',
+            // 'Programmation',
+            // 'Sigles Informatiques',
         ];
         // for ($i = 0; $i < count($cat_arr); $i++) {
-        foreach ($cat_arr as $cat_name => $quiz_arr) {
-            $category = new Category();
-            if ( !is_array($quiz_arr) ) {
-                $category->setName($quiz_arr);
-            }  else {
-                $category->setName($cat_name);
+        foreach ($arr as $cat_name => $quiz) {
+            $category_obj = new Category();
+            if (!is_array($quiz)) {
+                $category_obj->setName($quiz);
+            } else {
+                $category_obj->setName($cat_name);
             }
 
-            if (isset($quiz_arr) && is_array($quiz_arr)) {
-                foreach ($quiz_arr as $question => $answers) {
-                    $quiz = new Quiz();
-                    $quiz->setName($question)
-                        ->setData($answers)
-                        ->setCategory($category);
-                    $manager->persist($quiz);
+            if (isset($quiz) && is_array($quiz)) {
+                foreach ($quiz as $name => $data) {
+                    $quiz_obj = new Quiz();
+                    $quiz_obj->setName($name)
+                        ->setCategory($category_obj);
+                    foreach ($data as $question_name => $answers) {
+                        $question_obj = new Question();
+                        $question_obj->setName($question_name)
+                            ->setQuizId($quiz_obj);
+                        foreach ($answers as $answer => $value) {
+                            $answer_obj = new Answer();
+                            $answer_obj->setName($answer)
+                                ->setQuestionId($question_obj)
+                                ->setIsCorrect($value);
+                            $manager->persist($answer_obj);
+                        }
+                        $manager->persist($question_obj);
+                    }
+                    $manager->persist($quiz_obj);
                 }
             }
-            $manager->persist($category);
+            $manager->persist($category_obj);
         }
 
         $users_arr = [

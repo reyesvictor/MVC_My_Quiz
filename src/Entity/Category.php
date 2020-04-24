@@ -46,6 +46,11 @@ class Category
     private $quizzes;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category_id", orphanRemoval=true)
+     */
+    private $quizzes2;
+
+    /**
      * 
      * @ORM\PrePersist
      * @ORM\PreUpdate
@@ -63,6 +68,7 @@ class Category
     public function __construct()
     {
         $this->quizzes = new ArrayCollection();
+        $this->quizzes2 = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -153,6 +159,37 @@ class Category
             // set the owning side to null (unless already changed)
             if ($quiz->getCategory() === $this) {
                 $quiz->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Quiz[]
+     */
+    public function getQuizzes2(): Collection
+    {
+        return $this->quizzes2;
+    }
+
+    public function addQuizzes2(Quiz $quizzes2): self
+    {
+        if (!$this->quizzes2->contains($quizzes2)) {
+            $this->quizzes2[] = $quizzes2;
+            $quizzes2->setCategoryId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuizzes2(Quiz $quizzes2): self
+    {
+        if ($this->quizzes2->contains($quizzes2)) {
+            $this->quizzes2->removeElement($quizzes2);
+            // set the owning side to null (unless already changed)
+            if ($quizzes2->getCategoryId() === $this) {
+                $quizzes2->setCategoryId(null);
             }
         }
 
