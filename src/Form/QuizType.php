@@ -4,12 +4,14 @@ namespace App\Form;
 
 use App\Entity\Quiz;
 use App\Entity\Category;
+use App\Form\QuestionType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class QuizType extends AbstractType
 {
@@ -34,7 +36,7 @@ class QuizType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if (  $options['get_category_repo'] != '' ) {
+        if ($options['get_category_repo'] != '') {
 
             $getRepo = $options['get_category_repo'];
             $categoryList = $getRepo->findAll();
@@ -62,6 +64,12 @@ class QuizType extends AbstractType
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'name'
+            ])
+            ->add('questions', CollectionType::class, [
+                'entry_type' => QuestionType::class,
+                'entry_options' => [
+                    'questions' => $options['quiz']->getQuestions(),
+                ],
             ]);
     }
 
@@ -69,7 +77,7 @@ class QuizType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Quiz::class,
-            'quiz' => 'quiz', 
+            'quiz' => 'quiz',
             'get_category_repo' => '',
         ]);
         // $resolver->setRequired('get_category_repo');

@@ -24,7 +24,7 @@ class Question
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions", cascade={"persist"}))
      * @ORM\JoinColumn(nullable=false)
      */
     private $quiz;

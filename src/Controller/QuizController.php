@@ -6,6 +6,7 @@ use DateTime;
 use App\Entity\Quiz;
 use App\Form\QuizType;
 use App\Entity\Category;
+use App\Entity\Question;
 use App\Repository\QuizRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -73,6 +74,17 @@ class QuizController extends AbstractController
         //Passer un dernier param pour se servir de findAll dans QuizType
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz_temp = new Quiz();
+
+        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz->getId());
+        // dd($questions);
+        // $question = new Question();
+        // $question->setName($question);
+
+        foreach ($questions as $question) {
+            $quiz_temp->addQuestion($question);
+            $quiz->addQuestion($question);
+        }
+
         $form = $this->createForm(QuizType::class, $quiz_temp, [
             'get_category_repo' => $getRepo,
             'quiz' => $quiz,
@@ -82,47 +94,46 @@ class QuizController extends AbstractController
         // $form = $this->createForm(QuizType::class, $quiz);
 
         // dd($form);
-
+        // dd($quiz->getQuestions());
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // $this->getDoctrine()->getManager()->flush();
             // dd($quiz_temp);
-
-
             $entityManager = $this->getDoctrine()->getManager();
+            //questions modifiés se trouvent bien dans le $quiz de persist
             $entityManager->persist($quiz);
             // $entityManager->merge($quiz);
-
             $em = $this->getDoctrine()->getManager();
 
-
             //Quiz Name Must Be Unique
-            if ( !empty($product = $em->getRepository(Quiz::class)->findOneByName($quiz_temp->getName())) 
-            && strtolower($product->getName()) == strtolower($quiz_temp->getName()) 
-            && strtolower($product->getName()) !== strtolower($quiz->getName()) ) {
+            if (
+                !empty($product = $em->getRepository(Quiz::class)->findOneByName($quiz_temp->getName()))
+                && strtolower($product->getName()) == strtolower($quiz_temp->getName())
+                && strtolower($product->getName()) !== strtolower($quiz->getName())
+            ) {
                 $this->addFlash('danger', 'The quiz name is already taken. Please choose another.');
             } else {
                 if ($quiz_temp->getName() !== $quiz->getName() && $quiz_temp != null) {
                     $quiz->setName($quiz_temp->getName());
                 }
-
                 if ($quiz_temp->getData() !== $quiz->getData() && $quiz_temp != null) {
                     $quiz->setData($quiz_temp->getData());
                 }
                 if ($quiz_temp->getCategory() !== $quiz->getCategory() && $quiz_temp != null) {
                     $quiz->setcategory($quiz_temp->getCategory());
                 }
+                foreach ($quiz->getQuestions() as $question) {
+                    $question->setQuizId($quiz);
+                    $entityManager->persist($question);
+                }
                 $quiz->setUpdatedAt(new \DateTime('now'));
                 $quiz->createSlug($quiz->getName());
+                // dd($quiz);
                 $entityManager->flush();
-
-
-                
                 return $this->redirectToRoute('quiz_index');
             }
         }
-
         return $this->render('quiz/edit.html.twig', [
             'quiz' => $quiz,
             'form' => $form->createView(),

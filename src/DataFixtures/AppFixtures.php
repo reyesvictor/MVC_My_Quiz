@@ -84,6 +84,7 @@ class AppFixtures extends Fixture
                 foreach ($quiz as $name => $data) {
                     $quiz_obj = new Quiz();
                     $quiz_obj->setName($name)
+                        ->setData('Description faite dans AppFixtures')
                         ->setCategory($category_obj);
                     foreach ($data as $question_name => $answers) {
                         $question_obj = new Question();
