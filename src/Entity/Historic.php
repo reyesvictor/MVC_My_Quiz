@@ -21,12 +21,13 @@ class Historic
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="historics")
      */
-    private $user_id;
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="historics")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $quiz_id;
+    private $quiz;
 
     /**
      * @ORM\Column(type="array")
@@ -70,24 +71,24 @@ class Historic
 
     public function getUserId(): ?User
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(?User $user_id): self
+    public function setUserId(?User $user): self
     {
-        $this->user_id = $user_id;
+        $this->user = $user;
 
         return $this;
     }
 
     public function getQuizId(): ?Quiz
     {
-        return $this->quiz_id;
+        return $this->quiz;
     }
 
-    public function setQuizId(?Quiz $quiz_id): self
+    public function setQuizId(?Quiz $quiz): self
     {
-        $this->quiz_id = $quiz_id;
+        $this->quiz = $quiz;
 
         return $this;
     }

@@ -3,9 +3,16 @@
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+// * @UniqueEntity(fields={"name"}, message="A quiz with this name already exists.")
+
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuizRepository")
@@ -22,6 +29,7 @@ class Quiz
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=3, max=100, minMessage="The name is too short...", maxMessage="The name is too long !")
      */
     private $name;
 
@@ -52,12 +60,12 @@ class Quiz
     private $updated_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"})
      */
     private $historics;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz_id", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz", orphanRemoval=true, cascade={"remove"})
      */
     private $questions;
 
@@ -74,11 +82,15 @@ class Quiz
      * 
      * @return void
      */
-    public function createSlug()
+    public function createSlug($slug = null)
     {
-        if (empty($this->slug)) {
+        if (empty($this->slug) || $slug == false) {
             $slugify = new Slugify();
             $this->slug = $slugify->slugify($this->name);
+        } else {
+            $slugify = new Slugify();
+            $this->slug = $slugify->slugify($this->name);
+            return $this;
         }
     }
 
@@ -232,3 +244,6 @@ class Quiz
     }
 
 }
+
+
+

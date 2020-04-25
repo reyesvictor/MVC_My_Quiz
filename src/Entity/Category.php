@@ -41,12 +41,12 @@ class Category
     private $updated_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category")
+     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category", cascade={"remove"})
      */
     private $quizzes;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category_id", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category_id", orphanRemoval=true, cascade={"remove"})
      */
     private $quizzes2;
 

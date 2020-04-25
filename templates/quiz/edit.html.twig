@@ -1,13 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Quiz{% endblock %}
+{% block title %}Edit Quiz
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Quiz</h1>
+	<h1>Edit Quiz</h1>
+	{% for label, messages in app.flashes %}
+		<div class="container">
+			<div class="alert alert-{{ label }}">
+				{% for message in messages %}
+					<p>{{ message | raw }}</p>
+				{% endfor %}
 
-    {{ include('quiz/_form.html.twig', {'button_label': 'Update'}) }}
+			</div>
+		</div>
+	{% endfor %}
 
-    <a href="{{ path('quiz_index') }}">back to list</a>
 
-    {{ include('quiz/_delete_form.html.twig') }}
+	{{ include('quiz/_form.html.twig', {'button_label': 'Update'}) }}
+
+	<a href="{{ path('quiz_index') }}">back to list</a>
+
+	{{ include('quiz/_delete_form.html.twig') }}
 {% endblock %}

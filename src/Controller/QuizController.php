@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use DateTime;
 use App\Entity\Quiz;
 use App\Form\QuizType;
 use App\Entity\Category;
@@ -14,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/quiz")
+ * @(repositoryClass="Blogger\BlogBundle\Repository\BlogRepository")
  */
 class QuizController extends AbstractController
 {
@@ -63,14 +65,17 @@ class QuizController extends AbstractController
 
     /**
      * @Route("/{id}/edit", name="quiz_edit", methods={"GET","POST"})
+     * 
      */
     public function edit(Request $request, Quiz $quiz): Response
     {
+        // dd($quiz);
         //Passer un dernier param pour se servir de findAll dans QuizType
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz_temp = new Quiz();
         $form = $this->createForm(QuizType::class, $quiz_temp, [
             'get_category_repo' => $getRepo,
+            'quiz' => $quiz,
         ]);
         //===============================================================
 
@@ -81,9 +86,38 @@ class QuizController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            // $this->getDoctrine()->getManager()->flush();
+            // dd($quiz_temp);
 
-            return $this->redirectToRoute('quiz_index');
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($quiz);
+            // $entityManager->merge($quiz);
+
+            $em = $this->getDoctrine()->getManager();
+
+
+            //Quiz Name Must Be Unique
+            if ( !empty($product = $em->getRepository(Quiz::class)->findOneByName($quiz_temp->getName())) 
+            && strtolower($product->getName()) == strtolower($quiz_temp->getName()) 
+            && strtolower($product->getName()) !== strtolower($quiz->getName()) ) {
+                $this->addFlash('danger', 'The quiz name is already taken. Please choose another.');
+            } else {
+                if ($quiz_temp->getName() !== $quiz->getName() && $quiz_temp != null) {
+                    $quiz->setName($quiz_temp->getName());
+                }
+
+                if ($quiz_temp->getData() !== $quiz->getData() && $quiz_temp != null) {
+                    $quiz->setData($quiz_temp->getData());
+                }
+                if ($quiz_temp->getCategory() !== $quiz->getCategory() && $quiz_temp != null) {
+                    $quiz->setcategory($quiz_temp->getCategory());
+                }
+                $quiz->setUpdatedAt(new \DateTime('now'));
+                $quiz->createSlug($quiz->getName());
+                $entityManager->flush();
+                return $this->redirectToRoute('quiz_index');
+            }
         }
 
         return $this->render('quiz/edit.html.twig', [
@@ -99,6 +133,7 @@ class QuizController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete' . $quiz->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
+            // dd($quiz);
             $entityManager->remove($quiz);
             $entityManager->flush();
         }
@@ -106,7 +141,7 @@ class QuizController extends AbstractController
         return $this->redirectToRoute('quiz_index');
     }
 
-    
+
     /**
      * @Route("/{id}", name="quiz_show", methods={"GET"})
      */

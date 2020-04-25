@@ -21,11 +21,11 @@ class QuizType extends AbstractType
      * @param string $placeholder
      * @return array
      */
-    private function getConfiguration($label, $placeholder)
+    private function getConfiguration($value, $placeholder)
     {
         return [
             'attr' => [
-                // 'value' => 'Jean',
+                'value' => $value,
                 // 'label' => $label,
                 'placeholder' => $placeholder,
             ]
@@ -34,31 +34,31 @@ class QuizType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $getRepo = $options['get_category_repo'];
-        $categoryList = $getRepo->findAll();
-        // dd($categoryList);
-        foreach ($categoryList as $key => $value) {
-            // dd($value);
-            $choices[$value->getName()] = $value->getId();
-            // $choices[$value->getName()] = new Category();
+        if (  $options['get_category_repo'] != '' ) {
+
+            $getRepo = $options['get_category_repo'];
+            $categoryList = $getRepo->findAll();
+            // dd($categoryList);
+            foreach ($categoryList as $key => $value) {
+                // dd($value);
+                $choices[$value->getName()] = $value->getId();
+                // $choices[$value->getName()] = new Category();
+            }
         }
 
         // dd($choices);
 
         //New Quiz
+        if ($options['quiz'] !== 'quiz') {
+            $name_value = $options['quiz']->getName();
+            $data_value = $options['quiz']->getData();
+        } else {
+            $name_value = "";
+            $data_value = "";
+        }
         $builder
-            ->add('name', TextType::class, $this->getConfiguration('Titre', 'Votre titre ici'))
-            ->add('data')
-            // ->add('category', ChoiceType::class, [
-            //     // 'class' => Category::class
-            //     'choices'  => $choices,
-            //     // 'choices'  => [
-            //     //     new Category(2),
-            //     //     new Category(3),
-            //     //     new Category(4),
-
-            //     // ]
-            // ],);
+            ->add('name', TextType::class, $this->getConfiguration($name_value, 'Title here'))
+            ->add('data', TextType::class, $this->getConfiguration($data_value, 'Description here'))
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'name'
@@ -69,7 +69,9 @@ class QuizType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Quiz::class,
+            'quiz' => 'quiz', 
+            'get_category_repo' => '',
         ]);
-        $resolver->setRequired('get_category_repo');
+        // $resolver->setRequired('get_category_repo');
     }
 }
