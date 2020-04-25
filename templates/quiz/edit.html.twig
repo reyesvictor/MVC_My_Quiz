@@ -5,6 +5,7 @@
 
 {% block body %}
 	<h1>Edit Quiz</h1>
+
 	{% for label, messages in app.flashes %}
 		<div class="container">
 			<div class="alert alert-{{ label }}">
@@ -15,7 +16,6 @@
 			</div>
 		</div>
 	{% endfor %}
-
 
 	{{ include('quiz/_form.html.twig', {'button_label': 'Update'}) }}
 

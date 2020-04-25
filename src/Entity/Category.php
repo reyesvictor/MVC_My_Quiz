@@ -46,11 +46,6 @@ class Category
     private $quizzes;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="category_id", orphanRemoval=true, cascade={"remove"})
-     */
-    private $quizzes2;
-
-    /**
      * 
      * @ORM\PrePersist
      * @ORM\PreUpdate

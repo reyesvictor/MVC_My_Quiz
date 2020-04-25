@@ -116,6 +116,9 @@ class QuizController extends AbstractController
                 $quiz->setUpdatedAt(new \DateTime('now'));
                 $quiz->createSlug($quiz->getName());
                 $entityManager->flush();
+
+
+                
                 return $this->redirectToRoute('quiz_index');
             }
         }
