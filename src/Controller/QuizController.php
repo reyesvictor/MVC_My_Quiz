@@ -7,6 +7,7 @@ use App\Form\QuizType;
 use App\Entity\Category;
 use App\Repository\QuizRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +30,7 @@ class QuizController extends AbstractController
     /**
      * @Route("/new", name="quiz_new", methods={"GET","POST"})
      */
+    // public function new(Request $request, ObjectManager $entityManager): Response
     public function new(Request $request): Response
     {
         //Passer un dernier param pour se servir de findAll dans QuizType
@@ -73,6 +75,9 @@ class QuizController extends AbstractController
         //===============================================================
 
         // $form = $this->createForm(QuizType::class, $quiz);
+
+        // dd($form);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

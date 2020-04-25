@@ -165,8 +165,8 @@ class Category
         return $this;
     }
 
-    public function __toString()
-    {
-        return $this->id;
-    }
+    // public function __toString()
+    // {
+    //     return $this->id;
+    // }
 }

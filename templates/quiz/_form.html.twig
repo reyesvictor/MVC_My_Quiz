@@ -1,12 +1,12 @@
 {{ form_start(form) }}
 <div class="form-group">
-	{# {{ form_widget(form)	}} #}
-	{{ form_label(form.name)}}
-	{{ form_widget(form.name, {'attr': {'class':'form-control'}})	}}
+	{{ form_widget(form)}}
+	{# {{ form_label(form.name)}}
+	{{ form_widget(form.name, {'attr': {'class':'form-control', 'value': quiz.name}  })  }}
 	{{ form_label(form.data)}}
-	{{ form_widget(form.data, {'attr': {'class':'form-control'}})	}}
+	{{ form_widget(form.data, {'attr': {'class':'form-control', 'value': quiz.data}})	}}
 	{{ form_label(form.category)}}
-	{{ form_widget(form.category, {'attr': {'class':'form-control'}})	}}
+	{{ form_widget(form.category, {'attr': {'class':'form-control'}})	}} #}
 	<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
 </div>
 {{ form_end(form) }}

@@ -178,3 +178,20 @@ reinstallation de doctrine car findAll et getDoctrine ne marchent pas
 
 suivi cest etapes pour faire une requete dans le QuizType
 https://symfony.com/doc/4.1/form/form_dependencies.html
+
+
+//soit disant faire
+php bin/console make:form CategoryType
+Category
+
+
+=======================Solution create new() quiz title + category ========================
+cet exemple de sauveur!!!!
+https://openclassrooms.com/forum/sujet/resolu-symfony-4-relation-manytoone-dans-form
+$builder
+    ->add('category', EntityType::class, [
+        'class' => Category::class,
+        'choice_label' => 'name', ])
+
+fallait utiliser EntityType + choice_label
+===========================================================================================

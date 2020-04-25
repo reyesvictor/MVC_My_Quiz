@@ -116,6 +116,7 @@ class Quiz
         return $this->category;
     }
 
+    // public function setCategory(?int $category): self
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
