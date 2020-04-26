@@ -49,11 +49,12 @@ class QuizType extends AbstractType
         }
 
         // dd($choices);
-
+        global $quiz;
+        $quiz =  $options['quiz'];
         //New Quiz
-        if ($options['quiz'] !== 'quiz') {
-            $name_value = $options['quiz']->getName();
-            $data_value = $options['quiz']->getData();
+        if ($quiz !== 'quiz') {
+            $name_value = $quiz->getName();
+            $data_value = $quiz->getData();
         } else {
             $name_value = "";
             $data_value = "";
@@ -63,7 +64,13 @@ class QuizType extends AbstractType
             ->add('data', TextType::class, $this->getConfiguration($data_value, 'Description here'))
             ->add('category', EntityType::class, [
                 'class' => Category::class,
-                'choice_label' => 'name'
+                'choice_label' => 'getName',
+                'preferred_choices' => function (?Category $category) {
+                    global $quiz;
+                        if ($quiz->getCategory()->getName() !== $category->getName()) {
+                        return false;
+                    }
+                },
             ])
             ->add('questions', CollectionType::class, [
                 'entry_type' => QuestionType::class,
@@ -73,8 +80,7 @@ class QuizType extends AbstractType
 
                     // 'questions' => $options['quiz']->getQuestions(),
                 ],
-            ])
-            ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

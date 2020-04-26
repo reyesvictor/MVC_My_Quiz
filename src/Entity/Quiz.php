@@ -84,14 +84,9 @@ class Quiz
      */
     public function createSlug($slug = null)
     {
-        if (empty($this->slug) || $slug == false) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->name);
-        } else {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->name);
-            return $this;
-        }
+        $slugify = new Slugify();
+        $this->slug = $slugify->slugify($this->name);
+        return $this;
     }
 
     public function getId(): ?int
@@ -242,10 +237,4 @@ class Quiz
 
         return $this;
     }
-
 }
-
-
-
-
-

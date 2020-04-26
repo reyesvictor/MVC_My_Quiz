@@ -54,10 +54,9 @@ class Category
      */
     public function createSlug()
     {
-        if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->name);
-        }
+        $slugify = new Slugify();
+        $this->slug = $slugify->slugify($this->name);
+        return $this;
     }
 
     public function __construct()
