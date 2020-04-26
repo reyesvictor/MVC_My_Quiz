@@ -1,11 +1,46 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Quiz{% endblock %}
+{% block title %}New Quiz
+{% endblock %}
+
+{% form_theme form _self %}
+
 
 {% block body %}
-    <h1>Create new Quiz</h1>
+	<h1>Create new Quiz</h1>
 
-    {{ include('quiz/_form.html.twig') }}
+	{{ include('quiz/_form.html.twig') }}
 
-    <a href="{{ path('quiz_index') }}">back to list</a>
+	<a href="{{ path('quiz_index') }}">back to list</a>
+{% endblock %}
+
+{% block _quiz_questions_widget %}
+	{{ form_widget(form) }}
+{% endblock %}
+
+
+{% block _quiz_questions_entry_row %}
+	{{ form_widget(form) }}
+{% endblock %}
+
+{% block _quiz_questions_entry_widget %}
+	<div class="form-group">
+		<p>
+			Question
+			{{ form.vars.name + 1}}
+			{{ form_widget(form.name) }}
+			{% for question in form %}
+				{% for answers in question %}
+                Answer
+					{% for answer in answers %}
+                    {# {{dump(answers)}} #}
+						{# Answer #{{answers.vars.name}} #}
+                        {% set ans =  answers.vars.name + 1 %}
+                        {{form_label(answer, ans)}}
+						{{form_widget(answer)}}
+					{% endfor %}
+				{% endfor %}
+			{% endfor %}
+		</p>
+	</div>
 {% endblock %}

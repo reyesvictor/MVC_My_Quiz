@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use DateTime;
 use App\Entity\Quiz;
+use App\Entity\Answer;
 use App\Form\QuizType;
 use App\Entity\Category;
 use App\Entity\Question;
@@ -39,8 +40,28 @@ class QuizController extends AbstractController
         //Passer un dernier param pour se servir de findAll dans QuizType
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz = new Quiz();
+        for ($i = 0; $i < 10; $i++) {
+            $questions{$i} = new Question();
+            $questions{$i}->setName('Question-Generated-In-QuizController-' . ($i + 1));
+            for ($j = 1; $j < 4; $j++) {
+                $answer{$j} = new Answer();
+                $answer{$j}->setName('Question-' . ($i + 1) . '-Answer-' . $j );
+                if ( $j == 1 ) {
+                    $answer{$j}->setIsCorrect(true);
+                } else {
+                    $answer{$j}->setIsCorrect(false);
+                }
+                $questions{$i}->addAnswer($answer{$j});
+            }
+            $quiz->addQuestion($questions{$i});
+        }
+        $quiz->setName("Akira");
+        $quiz->setData("Tetsuo, un adolescent...");
+
+        // $question->setQuizId($quiz);
         $form = $this->createForm(QuizType::class, $quiz, [
             'get_category_repo' => $getRepo,
+            'quiz' => $quiz
         ]);
         //===============================================================
 
@@ -49,6 +70,7 @@ class QuizController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($quiz);
+            // dd($quiz);
             $entityManager->flush();
 
             return $this->redirectToRoute('quiz_index');
@@ -75,20 +97,24 @@ class QuizController extends AbstractController
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz_temp = new Quiz();
 
-        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz->getId());
-        // dd($questions);
-        // $question = new Question();
-        // $question->setName($question);
 
+
+        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz->getId());
         foreach ($questions as $question) {
+            $answers =  $this->getDoctrine()->getRepository(Answer::class)->findByQuestion($question->getId());
+            foreach ($answers as $anwser) {
+                $question->addAnswer($anwser);
+            }
             $quiz_temp->addQuestion($question);
             $quiz->addQuestion($question);
+            
         }
 
         $form = $this->createForm(QuizType::class, $quiz_temp, [
             'get_category_repo' => $getRepo,
             'quiz' => $quiz,
         ]);
+        // dd($form);
         //===============================================================
 
         // $form = $this->createForm(QuizType::class, $quiz);

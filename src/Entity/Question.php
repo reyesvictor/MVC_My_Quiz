@@ -24,13 +24,13 @@ class Question
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions", cascade={"persist"}))
+     * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions", cascade={"remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $quiz;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Answer", mappedBy="question", cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Answer", mappedBy="question", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
      */
     private $answers;
 

@@ -7,6 +7,45 @@
 	{{ form_widget(form.data, {'attr': {'class':'form-control', 'value': quiz.data}})	}}
 	{{ form_label(form.category)}}
 	{{ form_widget(form.category, {'attr': {'class':'form-control'}})	}} #}
-	<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
+
+	{# {% for number, question in form.questions %}
+		<fieldset class="form-group">
+			<div id="quiz_questions_{{number}}">
+				<label for="quiz_questions_{{number}}_name" class="required">Question
+					{{number + 1}}</label>
+				<input type="text" id="quiz_questions_{{number}}_name" name="quiz[questions][{{number}}][name]" required="required" class="form-control" value="{{(question.vars.value.name)}}">
+			</div>
+			{% for answers in question %}
+				<fieldset class="form-group">
+					<legend class="col-form-label required">Answers for
+						{{question.vars.value.name}}</legend>
+					<div id="quiz_questions_{{number}}_answers">
+						{% for ans_num, answer in answers %}
+							<fieldset class="form-group">
+								<div id="quiz_questions_{{number}}_answers_{{ans_num}}">
+									<div class="form-group">
+										<label for="quiz_questions_{{number}}_answers_{{ans_num}}_name" class="required">Answer {{ans_num + 1}}</label>
+										<input type="text" id="quiz_questions_{{number}}_answers_{{ans_num}}_name" name="quiz[questions][{{number}}][answers][{{ans_num}}][name]" required="required" class="form-control" value="Question-{{number + 1}}-Answer-{{ans_num + 1}}"></div>
+									<div class="form-group">
+										<div class="form-check">
+											<input type="checkbox" id="quiz_questions_{{number}}_answers_{{ans_num}}_is_correct" name="quiz[questions][1][answers][{{ans_num}}][is_correct]" class="form-check-input" value="1" checked="checked">
+											<label class="form-check-label" for="quiz_questions_{{number}}_answers_{{ans_num}}_is_correct">Is correct</label>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+						{% endfor %}
+					</div>
+				</fieldset>
+			{% endfor %}
+		</div>
+	</fieldset>
+{% endfor %} #}
+
+
+<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
 </div>
 {{ form_end(form) }}
+
+
+

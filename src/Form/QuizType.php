@@ -67,10 +67,14 @@ class QuizType extends AbstractType
             ])
             ->add('questions', CollectionType::class, [
                 'entry_type' => QuestionType::class,
+                'label' => 'Questions List',
+                // 'label_format' => 'form.questions.%name%',
                 'entry_options' => [
-                    'questions' => $options['quiz']->getQuestions(),
+
+                    // 'questions' => $options['quiz']->getQuestions(),
                 ],
-            ]);
+            ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver)

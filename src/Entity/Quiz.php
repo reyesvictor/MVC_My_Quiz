@@ -60,12 +60,12 @@ class Quiz
     private $updated_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
      */
     private $historics;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz", orphanRemoval=true, cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
      */
     private $questions;
 
@@ -244,6 +244,8 @@ class Quiz
     }
 
 }
+
+
 
 
 
