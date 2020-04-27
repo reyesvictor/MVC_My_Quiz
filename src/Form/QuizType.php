@@ -12,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
 
 class QuizType extends AbstractType
 {
@@ -59,6 +60,7 @@ class QuizType extends AbstractType
             $name_value = "";
             $data_value = "";
         }
+
         $builder
             ->add('name', TextType::class, $this->getConfiguration($name_value, 'Title here'))
             ->add('data', TextType::class, $this->getConfiguration($data_value, 'Description here'))
@@ -67,7 +69,7 @@ class QuizType extends AbstractType
                 'choice_label' => 'getName',
                 'preferred_choices' => function (?Category $category) {
                     global $quiz;
-                        if ($quiz->getCategory()->getName() !== $category->getName()) {
+                    if ($quiz != '' && $category != null && $quiz->getCategory() != null && $quiz->getCategory()->getName() !== $category->getName()) {
                         return false;
                     }
                 },

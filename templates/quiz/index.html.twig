@@ -28,6 +28,7 @@
                 <td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
                     <a href="{{ path('quiz_show', {'id': quiz.id}) }}">show</a>
+                    <a href="{{ path('quiz_play', {'id': quiz.id}) }}">play</a>
                     <a href="{{ path('quiz_edit', {'id': quiz.id}) }}">edit</a>
                 </td>
             </tr>

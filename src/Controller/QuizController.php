@@ -5,6 +5,7 @@ namespace App\Controller;
 use DateTime;
 use App\Entity\Quiz;
 use App\Entity\Answer;
+use App\Form\PlayType;
 use App\Form\QuizType;
 use App\Entity\Category;
 use App\Entity\Question;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -41,19 +43,28 @@ class QuizController extends AbstractController
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz = new Quiz();
         for ($i = 0; $i < 10; $i++) {
-            $questions{$i} = new Question();
-            $questions{$i}->setName('Question-Generated-In-QuizController-' . ($i + 1));
+            $questions{
+                $i} = new Question();
+            $questions{
+                $i}->setName('Question-Generated-In-QuizController-' . ($i + 1));
             for ($j = 1; $j < 4; $j++) {
-                $answer{$j} = new Answer();
-                $answer{$j}->setName('Question-' . ($i + 1) . '-Answer-' . $j );
-                if ( $j == 1 ) {
-                    $answer{$j}->setIsCorrect(true);
+                $answer{
+                    $j} = new Answer();
+                $answer{
+                    $j}->setName('Question-' . ($i + 1) . '-Answer-' . $j);
+                if ($j == 1) {
+                    $answer{
+                        $j}->setIsCorrect(true);
                 } else {
-                    $answer{$j}->setIsCorrect(false);
+                    $answer{
+                        $j}->setIsCorrect(false);
                 }
-                $questions{$i}->addAnswer($answer{$j});
+                $questions{
+                    $i}->addAnswer($answer{
+                    $j});
             }
-            $quiz->addQuestion($questions{$i});
+            $quiz->addQuestion($questions{
+                $i});
         }
         $quiz->setName("Akira");
         $quiz->setData("Tetsuo, un adolescent...");
@@ -98,7 +109,6 @@ class QuizController extends AbstractController
         $quiz_temp = new Quiz();
 
 
-
         $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz->getId());
         foreach ($questions as $question) {
             $answers =  $this->getDoctrine()->getRepository(Answer::class)->findByQuestion($question->getId());
@@ -107,7 +117,6 @@ class QuizController extends AbstractController
             }
             $quiz_temp->addQuestion($question);
             $quiz->addQuestion($question);
-            
         }
 
         $form = $this->createForm(QuizType::class, $quiz_temp, [
@@ -181,6 +190,135 @@ class QuizController extends AbstractController
         return $this->redirectToRoute('quiz_index');
     }
 
+    /**
+     * @Route("/{id}/play", name="quiz_play",methods={"GET","POST"})
+     */
+    public function play(Quiz $quiz, Request $request): Response
+    {
+        $id = $quiz->getId();
+        $cache_name = 'quiz.game' . $id;
+
+        //if first time played
+        $cache = new FilesystemAdapter();
+        // $cache->deleteItem($cache_name);         dd();
+        $productsCount = $cache->getItem($cache_name);
+        // dd($productsCount->get());
+        $qst_key = 0;
+        if ($productsCount->get() != null) {
+            $qst_key = array_search(false, $productsCount->get()['data']);
+        }
+        //Getting questions
+        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz);
+
+
+
+        if (!$cache->getItem($cache_name)->isHit()) { //create game if it doesnt exist
+            echo 'New Game';
+            echo '<br>';
+
+            foreach ($questions as $key => $question) {
+                $cache_questions[$key] = false; //Generate question array for cache
+                $question->setQuizId($quiz);
+                $answers =  $this->getDoctrine()->getRepository(Answer::class)->findByQuestion($question);
+                foreach ($answers as $answer) {
+                    $question->addAnswer($answer);
+                }
+            }
+
+            echo 'Registrating quiz data to begin';
+            echo '<br>';
+            $productsCount = $cache->getItem($cache_name);
+            $productsCount->set([
+                'quiz_id' => $quiz->getId(),
+                'data' => $cache_questions,
+            ]);
+            $cache->save($productsCount);
+        } else { //continue game until all questions are answered == true
+            echo 'Game exists<br>';
+            echo 'Continue with question:';
+            echo '<br>';
+            //continue game
+            // $cache->deleteItem('quiz.game');
+        }
+
+
+
+        //test display
+        // $productsCount = $cache->getItem('quiz.game');
+        // $qst_key = array_search(false, $productsCount->get()['data']);
+        // dd($productsCount->get());
+        // dd($qst_key);
+        // dd($questions[0]);
+
+        //Answer validation
+        if (strtolower($request->server->get("REQUEST_METHOD")) == 'get') {
+            echo 'this is get';
+            echo '<br>';
+        }
+        if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
+            echo 'this is post';
+            echo '<br>';
+            if (count($request->request->all()) == 0) {
+                // dd($request->request->all());
+                $this->addFlash('danger', 'You must submit an answer.');
+            } else if (count($request->request->all()) > 1) {
+                // dd($request->request->all());
+                $this->addFlash('danger', 'You must not submit more than one answer.');
+            } else {
+                // dd();
+                // dd($cache_questions);
+                $cache_questions = $productsCount->get()['data'];
+                // dd($productsCount);
+                $cache_questions[$qst_key] = array_key_first($request->request->all());
+                $productsCount->set([
+                    'quiz_id' => $quiz->getId(),
+                    'data' => $cache_questions,
+                ]);
+                $cache->save($productsCount);
+                // dd($productsCount->get()['data']);
+                if (!($qst_key = array_search(false, $productsCount->get()['data']))) {
+                    echo 'Quiz is finished !';
+                    echo '<br>';
+                    echo 'Score:';
+                    //redirect to another page to show score
+                    //store game inside cache (?) if not connected and in historic if connected
+                    //calcul de score.... la merde, comparaison avec la bdd
+                    dd($productsCount->get()['data']);
+                    dd(array_search(false, $productsCount->get()['data']));
+                }
+            }
+        }
+
+        // dd(
+
+        //     $questions[0]->getAnswers()[0]
+        // );
+
+        //  builderform doesnt work with my checkbox parameters
+        // $form = $this->createForm(PlayType::class, $questions[$qst_key], [
+        //     'question' => $questions[$qst_key]
+        // ]);
+        //automatically display first question
+
+
+        // dd($qst_key);
+        return $this->render('quiz/play.html.twig', [
+            'quiz' => $quiz,
+            'questions' => $questions,
+            'qst_key' => $qst_key,
+            // 'form' => $form->createView(),
+        ]);
+
+        // $productsCount = $cache->getItem('quiz.game');
+        // dd($productsCount->get());
+
+        // $cache->deleteItem('quiz.game');
+
+        // return $this->render('quiz/play.html.twig', [
+        //     'quiz' => $quiz,
+        //     'questions' => $questions,
+        // ]);
+    }
 
     /**
      * @Route("/{id}", name="quiz_show", methods={"GET"})

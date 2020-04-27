@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz
+
+{% endblock %}
+
+
+{% block body %}
+
+
+	{{ include('includes/danger_flash.html.twig') }}
+
+	{# {{ form_start(form) }}
+	<div class="form-group">
+		{{ form_widget(form) }}
+	
+	<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
+	</div>
+	{{ form_end(form) }} #}
+
+	<h1>{{ quiz.name }}</h1>
+
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Quiz Id</th>
+				<td>{{ quiz.id }}</td>
+			</tr>
+			<tr>
+				<th>Question
+					{{ qst_key + 1 }}</th>
+				<td>{{ questions[qst_key].name }}</td>
+			</tr>
+			<form action="{{ path('quiz_play', {'id': quiz.id}) }}" method="post">
+				{% for key, answer in questions[qst_key].answers %}
+					<tr>
+						<th>Answer
+							{{key + 1}}</th>
+						<td>
+							<input type="checkbox" value='{{key}}' name="{{answer.name}}">
+							{{ answer.name }}
+						</td>
+					</tr>
+				{% endfor %}
+				<tr>
+					<th>Submit</th>
+					<td>
+						<button class="btn btn-primary" type="submit">Submit answer</button>
+					</td>
+				</tr>
+			</form>
+		</tbody>
+	</tbody>
+</table>{% endblock %}

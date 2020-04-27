@@ -6,20 +6,12 @@
 {% block body %}
 	<h1>Edit Category</h1>
 
-	{% for label, messages in app.flashes %}
-		<div class="container">
-			<div class="alert alert-{{ label }}">
-				{% for message in messages %}
-					<p>{{ message | raw }}</p>
-				{% endfor %}
 
-			</div>
-		</div>
-	{% endfor %}
+	{{ include('includes/danger_flash.html.twig') }}
 
 	{{ include('category/_form.html.twig', {'button_label': 'Update'}) }}
 
-	<a href="{{ path('category_index') }}">Back To Category List</a>
+	<a href="{{ path('category_index', {'id': category.id}) }}">Back To Category List</a>
 
 	{{ include('category/_delete_form.html.twig') }}
 {% endblock %}

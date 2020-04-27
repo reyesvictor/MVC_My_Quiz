@@ -8,16 +8,7 @@
 {% block body %}
 	<h1>Edit Quiz</h1>
 
-	{% for label, messages in app.flashes %}
-		<div class="container">
-			<div class="alert alert-{{ label }}">
-				{% for message in messages %}
-					<p>{{ message | raw }}</p>
-				{% endfor %}
-
-			</div>
-		</div>
-	{% endfor %}
+	{{ include('includes/danger_flash.html.twig') }}
 
 	{{ include('quiz/_form.html.twig', {'button_label': 'Update'}) }}
 
