@@ -248,15 +248,21 @@ class QuizController extends AbstractController
 
         // dd($answers_from_user);
         //Answer validation
+        // dd($answers_from_user, !($qst_key = array_search(false, $productsCount->get()['data'])));
         if (
             strtolower($request->server->get("REQUEST_METHOD")) == 'get'
-            && count($answers_from_user) > 0
-            && !array_search(false, $answers_from_user)
         ) {
-            echo 'this is get';
-            echo '<br>';
-            $answers_from_user = $productsCount->get()['data'];
-            return $this->getScore($questions, $answers_from_user);
+            if (
+                count($answers_from_user) > 0 
+                && isset($answers_from_user[0])
+                && $answers_from_user[0] !=  false
+                && array_search(false, $productsCount->get()['data']) == false
+            ) {
+                echo 'this is get';
+                echo '<br>';
+                $answers_from_user = $productsCount->get()['data'];
+                return $this->getScore($questions, $answers_from_user);
+            }
         }
         if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
             if (isset($request->request->all()['retake']) && $request->request->all()['retake'] == 'retake') {
@@ -290,19 +296,16 @@ class QuizController extends AbstractController
                     !($qst_key = array_search(false, $productsCount->get()['data']))
                     && count($answers_from_user) > 0
                 ) {
-                    echo 'Quiz is finished !';
-                    echo '<br>';
-                    echo 'Score:';
-
                     //show score and retake button
                     $answers_from_user = $productsCount->get()['data'];
                     return $this->getScore($questions, $answers_from_user);
-
-                    // return $this->redirectToRoute('quiz_game_ended');
-                    //store game inside cache (?) if not connected and in historic if connected
-                    //calcul de score.... la merde, comparaison avec la bdd
                     // dd($productsCount->get()['data']);
                     // dd(array_search(false, $productsCount->get()['data']));
+
+                    //store game inside cache => Done
+                    // Display historic of games played with score...
+
+                    //  Store in historic if connected
                 }
             }
         }
@@ -346,12 +349,12 @@ class QuizController extends AbstractController
         $score = 0;
         foreach ($questions as $key => $question) {
             foreach ($question->getAnswers() as $answer) {
-                echo(preg_replace('/\_/', " ", $answers_from_user[$key]));
-                echo '<br>';
-                echo $answer->getName();
-                echo '<br>';
-                echo($answer->getIsCorrect());
-                echo '<br>';
+                // echo(preg_replace('/\_/', " ", $answers_from_user[$key]));
+                // echo '<br>';
+                // echo $answer->getName();
+                // echo '<br>';
+                // echo($answer->getIsCorrect());
+                // echo '<br>';
                 // dd($question->getAnswers(), $answers_from_user);
                 if (preg_replace('/\_/', " ", $answers_from_user[$key]) == $answer->getName() && $answer->getIsCorrect()) {
                     $score++;
