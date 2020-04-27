@@ -196,35 +196,31 @@ class QuizController extends AbstractController
     public function play(Quiz $quiz, Request $request): Response
     {
         $id = $quiz->getId();
-        $cache_name = 'quiz.game' . $id;
-
-        //if first time played
+        $cache_name = 'quiz.game.' . $id;
         $cache = new FilesystemAdapter();
-        // $cache->deleteItem($cache_name);         dd();
+        // $cache->deleteItem($cache_name);   dd();
         $productsCount = $cache->getItem($cache_name);
-        // dd($productsCount->get());
+        $answers_from_user = [];
+        if ($productsCount->get() != null) {
+            $answers_from_user = $productsCount->get()['data'];
+        }
         $qst_key = 0;
         if ($productsCount->get() != null) {
             $qst_key = array_search(false, $productsCount->get()['data']);
         }
         //Getting questions
         $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz);
-
-
-
+        foreach ($questions as $key => $question) {
+            $cache_questions[$key] = false; //Generate question array for cache
+            $question->setQuizId($quiz);
+            $answers =  $this->getDoctrine()->getRepository(Answer::class)->findByQuestion($question);
+            foreach ($answers as $answer) {
+                $question->addAnswer($answer);
+            }
+        }
         if (!$cache->getItem($cache_name)->isHit()) { //create game if it doesnt exist
             echo 'New Game';
             echo '<br>';
-
-            foreach ($questions as $key => $question) {
-                $cache_questions[$key] = false; //Generate question array for cache
-                $question->setQuizId($quiz);
-                $answers =  $this->getDoctrine()->getRepository(Answer::class)->findByQuestion($question);
-                foreach ($answers as $answer) {
-                    $question->addAnswer($answer);
-                }
-            }
-
             echo 'Registrating quiz data to begin';
             echo '<br>';
             $productsCount = $cache->getItem($cache_name);
@@ -250,12 +246,26 @@ class QuizController extends AbstractController
         // dd($qst_key);
         // dd($questions[0]);
 
+        // dd($answers_from_user);
         //Answer validation
-        if (strtolower($request->server->get("REQUEST_METHOD")) == 'get') {
+        if (
+            strtolower($request->server->get("REQUEST_METHOD")) == 'get'
+            && count($answers_from_user) > 0
+            && !array_search(false, $answers_from_user)
+        ) {
             echo 'this is get';
             echo '<br>';
+            $answers_from_user = $productsCount->get()['data'];
+            return $this->getScore($questions, $answers_from_user);
         }
         if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
+            if (isset($request->request->all()['retake']) && $request->request->all()['retake'] == 'retake') {
+                $cache->deleteItem($cache_name);
+                return $this->redirectToRoute('quiz_play', [
+                    'id' => $id
+                ]);
+            }
+
             echo 'this is post';
             echo '<br>';
             if (count($request->request->all()) == 0) {
@@ -276,15 +286,23 @@ class QuizController extends AbstractController
                 ]);
                 $cache->save($productsCount);
                 // dd($productsCount->get()['data']);
-                if (!($qst_key = array_search(false, $productsCount->get()['data']))) {
+                if (
+                    !($qst_key = array_search(false, $productsCount->get()['data']))
+                    && count($answers_from_user) > 0
+                ) {
                     echo 'Quiz is finished !';
                     echo '<br>';
                     echo 'Score:';
-                    //redirect to another page to show score
+
+                    //show score and retake button
+                    $answers_from_user = $productsCount->get()['data'];
+                    return $this->getScore($questions, $answers_from_user);
+
+                    // return $this->redirectToRoute('quiz_game_ended');
                     //store game inside cache (?) if not connected and in historic if connected
                     //calcul de score.... la merde, comparaison avec la bdd
-                    dd($productsCount->get()['data']);
-                    dd(array_search(false, $productsCount->get()['data']));
+                    // dd($productsCount->get()['data']);
+                    // dd(array_search(false, $productsCount->get()['data']));
                 }
             }
         }
@@ -318,6 +336,38 @@ class QuizController extends AbstractController
         //     'quiz' => $quiz,
         //     'questions' => $questions,
         // ]);
+    }
+
+
+    private function getScore($questions, $answers_from_user)
+    {
+        // dd(array_search(false, $answers_from_user));
+        echo 'quiz already played';
+        $score = 0;
+        foreach ($questions as $key => $question) {
+            foreach ($question->getAnswers() as $answer) {
+                echo(preg_replace('/\_/', " ", $answers_from_user[$key]));
+                echo '<br>';
+                echo $answer->getName();
+                echo '<br>';
+                echo($answer->getIsCorrect());
+                echo '<br>';
+                // dd($question->getAnswers(), $answers_from_user);
+                if (preg_replace('/\_/', " ", $answers_from_user[$key]) == $answer->getName() && $answer->getIsCorrect()) {
+                    $score++;
+                }
+            }
+        }
+        $score_str = $score . '/' . count($answers_from_user);
+        //bouton: retake and erase old one
+
+        return $this->render('quiz/play.html.twig', [
+            'quiz' => $questions[0]->getQuizId(),
+            'questions' => $questions,
+            'qst_key' => 0,
+            'quiz_done' => true,
+            'score_str' => $score_str,
+        ]);
     }
 
     /**

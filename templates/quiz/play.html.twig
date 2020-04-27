@@ -8,9 +8,9 @@
 {% block body %}
 
 
-	{{ include('includes/danger_flash.html.twig') }}
+{{ include('includes/danger_flash.html.twig') }}
 
-	{# {{ form_start(form) }}
+{# {{ form_start(form) }}
 	<div class="form-group">
 		{{ form_widget(form) }}
 	
@@ -18,7 +18,22 @@
 	</div>
 	{{ form_end(form) }} #}
 
-	<h1>{{ quiz.name }}</h1>
+<h1>{{ quiz.name }}</h1>
+
+{% if quiz_done is defined %}
+
+
+	<h1>Quiz ALREADY DONE</h1>
+	<h1>Score:
+		{{score_str}}</h1>
+
+	<form action="{{ path('quiz_play', {'id': quiz.id}) }}" method="post">
+	<input type="text" name="retake" value='retake' hidden>
+		<button class="btn btn-primary" type="submit">Replay</button>
+	</form>
+
+{% else %}
+
 
 	<table class="table">
 		<tbody>
@@ -51,4 +66,4 @@
 			</form>
 		</tbody>
 	</tbody>
-</table>{% endblock %}
+</table>{% endif %}{% endblock %}
