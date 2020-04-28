@@ -106,6 +106,7 @@ class AppFixtures extends Fixture
         }
 
         $users_arr = [
+            'Anonymous',
             'Martin Aubry',
             'Edouard Balladur',
             'Robert Badinter',

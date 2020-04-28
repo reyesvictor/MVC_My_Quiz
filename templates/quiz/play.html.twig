@@ -27,7 +27,7 @@
 	<h3>Score:
 		{{score_str}}</h3>
 
-	<form action="{{ path('quiz_play', {'id': quiz.id}) }}" method="post">
+	<form action="{{ path('quiz_play', {'id': quiz.id}) }}" method="post"  onsubmit="return confirm('Replaying will delete your previous score, continue ?');">
 	<input type="text" name="retake" value='retake' hidden>
 		<button class="btn btn-primary" type="submit">Replay</button>
 	</form>

@@ -1,0 +1,27 @@
+{% if historics|length > 0 %}
+	<h2>Historic</h2>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Quiz Name</th>
+				<th>Score</th>
+				<th>Played By</th>
+				<th>Played At</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for historic in historics %}
+				<tr>
+					<td>{{historic.quizId.name}}</td>
+					<td>{{ historic.score }}</td>
+					<td>{{ historic.userId.name }}</td>
+					<td>{{ historic.createdAt ? historic.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="7">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}

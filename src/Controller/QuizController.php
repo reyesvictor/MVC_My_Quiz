@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use DateTime;
 use App\Entity\Quiz;
+use App\Entity\User;
 use App\Entity\Answer;
 use App\Form\PlayType;
 use App\Form\QuizType;
 use App\Entity\Category;
+use App\Entity\Historic;
 use App\Entity\Question;
 use App\Repository\QuizRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,8 +30,33 @@ class QuizController extends AbstractController
      */
     public function index(QuizRepository $quizRepository): Response
     {
+
+        $historics = [];
+        $all_qz = $this->getDoctrine()->getManager()->getRepository(Quiz::class)->findAll();
+        foreach ($all_qz as $quiz) {
+            $id = $quiz->getId();
+            $cache = new FilesystemAdapter();
+            $cache_name = 'quiz.game.' . $id;
+            $possible_quiz = $cache->getItem($cache_name);
+
+            // ERROR : VERIFY BY historic_save for showing what is finished
+
+            if ($cache->getItem($cache_name)->isHit()) { //create game if it doesnt exist
+                array_push($historics, ['quiz_name' => $quiz->getName(), 'score' => '10/10']); //display structure
+
+                //faire un cache special scores etc comme ca pas besoin de la calculer ici
+                $possible_quiz->get()['data'];
+            }
+        }
+
+
+        $historics = $this->getDoctrine()->getRepository(Historic::class)->findAll();
+
+
+
         return $this->render('quiz/index.html.twig', [
             'quizzes' => $quizRepository->findAll(),
+            'historics' => $historics,
         ]);
     }
 
@@ -183,6 +210,8 @@ class QuizController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $quiz->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             // dd($quiz);
+            $cache = new FilesystemAdapter();
+            $cache->deleteItem('quiz.game.' . $quiz->getId());
             $entityManager->remove($quiz);
             $entityManager->flush();
         }
@@ -201,15 +230,35 @@ class QuizController extends AbstractController
         // $cache->deleteItem($cache_name);   dd();
         $productsCount = $cache->getItem($cache_name);
         $answers_from_user = [];
+        $qst_key = 0;
+        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz);
         if ($productsCount->get() != null) {
             $answers_from_user = $productsCount->get()['data'];
-        }
-        $qst_key = 0;
-        if ($productsCount->get() != null) {
             $qst_key = array_search(false, $productsCount->get()['data']);
+
+            //if replay button erase previous game from cache
+            if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
+                if (isset($request->request->all()['retake']) && $request->request->all()['retake'] == 'retake') {
+                    $cache->deleteItem($cache_name);
+                    return $this->redirectToRoute('quiz_play', [
+                        'id' => $id
+                    ]);
+                }
+            }
+
+            //probleme historic ne passe pas a true
+            if ($productsCount->get()['historic_stored']) {
+                return $this->render('quiz/play.html.twig', [
+                    'quiz' => $questions[0]->getQuizId(),
+                    'questions' => $questions,
+                    'qst_key' => 0,
+                    'quiz_done' => true,
+                    'score_str' => $productsCount->get()['score'],
+                ]);
+            }
         }
+
         //Getting questions
-        $questions =  $this->getDoctrine()->getRepository(Question::class)->findByQuiz($quiz);
         foreach ($questions as $key => $question) {
             $cache_questions[$key] = false; //Generate question array for cache
             $question->setQuizId($quiz);
@@ -227,44 +276,34 @@ class QuizController extends AbstractController
             $productsCount->set([
                 'quiz_id' => $quiz->getId(),
                 'data' => $cache_questions,
+                'historic_stored' => false,
+                'score' => false,
             ]);
             $cache->save($productsCount);
-        } else { //continue game until all questions are answered == true
-            echo 'Game exists<br>';
-            echo 'Continue with question:';
-            echo '<br>';
-            //continue game
-            // $cache->deleteItem('quiz.game');
         }
 
-
-
-        //test display
-        // $productsCount = $cache->getItem('quiz.game');
-        // $qst_key = array_search(false, $productsCount->get()['data']);
-        // dd($productsCount->get());
-        // dd($qst_key);
-        // dd($questions[0]);
-
-        // dd($answers_from_user);
-        //Answer validation
-        // dd($answers_from_user, !($qst_key = array_search(false, $productsCount->get()['data'])));
+        //If method get and if game already played show score and replay button
         if (
             strtolower($request->server->get("REQUEST_METHOD")) == 'get'
         ) {
             if (
-                count($answers_from_user) > 0 
+                count($answers_from_user) > 0
                 && isset($answers_from_user[0])
                 && $answers_from_user[0] !=  false
                 && array_search(false, $productsCount->get()['data']) == false
             ) {
-                echo 'this is get';
-                echo '<br>';
-                $answers_from_user = $productsCount->get()['data'];
-                return $this->getScore($questions, $answers_from_user);
+                return $this->render('quiz/play.html.twig', [
+                    'quiz' => $questions[0]->getQuizId(),
+                    'questions' => $questions,
+                    'qst_key' => 0,
+                    'quiz_done' => true,
+                    'score_str' => $productsCount->get()['score'],
+                ]);
             }
         }
+        
         if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
+            //If method post and if game already played show score and replay button
             if (isset($request->request->all()['retake']) && $request->request->all()['retake'] == 'retake') {
                 $cache->deleteItem($cache_name);
                 return $this->redirectToRoute('quiz_play', [
@@ -289,6 +328,8 @@ class QuizController extends AbstractController
                 $productsCount->set([
                     'quiz_id' => $quiz->getId(),
                     'data' => $cache_questions,
+                    'historic_stored' => false,
+                    'score' => false,
                 ]);
                 $cache->save($productsCount);
                 // dd($productsCount->get()['data']);
@@ -296,9 +337,26 @@ class QuizController extends AbstractController
                     !($qst_key = array_search(false, $productsCount->get()['data']))
                     && count($answers_from_user) > 0
                 ) {
+
+
+                    //store score and set historic_stored to true
+                    //equally in get verification
+                    // and replace it by only looking at historic_stored
+
+
                     //show score and retake button
                     $answers_from_user = $productsCount->get()['data'];
-                    return $this->getScore($questions, $answers_from_user);
+                    $this->saveToHistoric($productsCount, $quiz, $this->getScore($questions, $answers_from_user));
+                    // return $this->getScore($questions, $answers_from_user);
+
+                    return $this->render('quiz/play.html.twig', [
+                        'quiz' => $questions[0]->getQuizId(),
+                        'questions' => $questions,
+                        'qst_key' => 0,
+                        'quiz_done' => true,
+                        'score_str' => $productsCount->get()['score'],
+                    ]);
+
                     // dd($productsCount->get()['data']);
                     // dd(array_search(false, $productsCount->get()['data']));
 
@@ -309,68 +367,59 @@ class QuizController extends AbstractController
                 }
             }
         }
-
-        // dd(
-
-        //     $questions[0]->getAnswers()[0]
-        // );
-
-        //  builderform doesnt work with my checkbox parameters
-        // $form = $this->createForm(PlayType::class, $questions[$qst_key], [
-        //     'question' => $questions[$qst_key]
-        // ]);
-        //automatically display first question
-
-
-        // dd($qst_key);
         return $this->render('quiz/play.html.twig', [
             'quiz' => $quiz,
             'questions' => $questions,
             'qst_key' => $qst_key,
-            // 'form' => $form->createView(),
         ]);
-
-        // $productsCount = $cache->getItem('quiz.game');
-        // dd($productsCount->get());
-
-        // $cache->deleteItem('quiz.game');
-
-        // return $this->render('quiz/play.html.twig', [
-        //     'quiz' => $quiz,
-        //     'questions' => $questions,
-        // ]);
     }
 
+    private function saveToHistoric($cache, Quiz $quiz, $score)
+    {
+        //etape 1: faire un systeme qui change le historic_stored afin de ne pas repasser par la methode de verif get et post qui relancera le push de l'historique (risque d'historique infini)
+        //etape 2: faire un cache special historic qui se mettra jour et se pushera lui meme (array_push)
+        //comment faire un array qui s'autopush lui meme ?? passer par une variable intermédiaire.
+
+
+        //if connected-> getUserId
+        //else $user = $anonym
+        $user =  $this->getDoctrine()->getRepository(User::class)->findByName('Anonymous')[0];
+
+        //Storing to historic database
+        $h = new Historic();
+        $h->setUserId($user);
+        $h->setQuizId($quiz);
+        $h->setScore($score);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($h);
+        $entityManager->flush();
+
+
+        // setting cache parameter
+        $cache->set([
+            'quiz_id' => $cache->get()['quiz_id'],
+            'data' => $cache->get()['data'],
+            'historic_stored' => true,
+            'score' => $score,
+        ]);
+        $ch = new FilesystemAdapter();
+        $ch->save($cache);
+    }
 
     private function getScore($questions, $answers_from_user)
     {
-        // dd(array_search(false, $answers_from_user));
         echo 'quiz already played';
         $score = 0;
         foreach ($questions as $key => $question) {
             foreach ($question->getAnswers() as $answer) {
-                // echo(preg_replace('/\_/', " ", $answers_from_user[$key]));
-                // echo '<br>';
-                // echo $answer->getName();
-                // echo '<br>';
-                // echo($answer->getIsCorrect());
-                // echo '<br>';
-                // dd($question->getAnswers(), $answers_from_user);
+                // dd(preg_replace('/\_/', " ", $answers_from_user[$key]), $answer->getName());
                 if (preg_replace('/\_/', " ", $answers_from_user[$key]) == $answer->getName() && $answer->getIsCorrect()) {
                     $score++;
                 }
             }
         }
         $score_str = $score . '/' . count($answers_from_user);
-        //bouton: retake and erase old one
-
-        return $this->render('quiz/play.html.twig', [
-            'quiz' => $questions[0]->getQuizId(),
-            'questions' => $questions,
-            'qst_key' => 0,
-            'quiz_done' => true,
-            'score_str' => $score_str,
-        ]);
+        return $score_str;
     }
 
     /**

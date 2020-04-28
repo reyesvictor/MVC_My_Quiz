@@ -30,39 +30,25 @@ class Historic
     private $quiz;
 
     /**
-     * @ORM\Column(type="array")
+     * @ORM\Column(type="array", nullable=true)
      */
     private $answers = [];
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $score;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private $succeeded;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $created_at;
+    public $created_at;
 
-    /**
-     * 
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     * 
-     * @return void
-     */
-    public function createSlug()
-    {
-        if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->name);
-        }
-    }
 
     public function getId(): ?int
     {
@@ -105,12 +91,12 @@ class Historic
         return $this;
     }
 
-    public function getScore(): ?int
+    public function getScore(): ?string
     {
         return $this->score;
     }
 
-    public function setScore(int $score): self
+    public function setScore(string $score): self
     {
         $this->score = $score;
 
