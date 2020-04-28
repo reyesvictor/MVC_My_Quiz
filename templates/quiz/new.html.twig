@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% block header %}
+	{% include "includes/header.html.twig" %}
+{% endblock %}
+
 {% block title %}New Quiz
 {% endblock %}
 
@@ -7,11 +11,15 @@
 
 
 {% block body %}
-	<h1>Create new Quiz</h1>
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Create new Quiz</h1>
+			<a class='btn btn-secondary mb-2' href="{{ path('quiz_index') }}">Back to List</a>
 
-	{{ include('quiz/_form.html.twig') }}
+			{{ include('quiz/_form.html.twig') }}
 
-	<a class='btn btn-secondary'  href="{{ path('quiz_index') }}">Back to List</a>
+		</div>
+	</div>
 {% endblock %}
 
 {% block _quiz_questions_widget %}
@@ -31,16 +39,15 @@
 			{{ form_widget(form.name) }}
 			{% for question in form %}
 				{% for answers in question %}
-                Answer
+					Answer
 					{% for answer in answers %}
-                    {# {{dump(answers)}} #}
+						{# {{dump(answers)}} #}
 						{# Answer #{{answers.vars.name}} #}
-                        {% set ans =  answers.vars.name + 1 %}
-                        {{form_label(answer, ans)}}
-						{{form_widget(answer)}}
-					{% endfor %}
+						{% set ans =  answers.vars.name + 1 %}
+						{{form_label(answer, ans)}}
+					{{form_widget(answer)}}
 				{% endfor %}
 			{% endfor %}
-		</p>
-	</div>
-{% endblock %}
+		{% endfor %}
+	</p>
+</div>{% endblock %}

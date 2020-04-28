@@ -1,67 +1,77 @@
 {% extends 'base.html.twig' %}
 
+{% block header %}
+	{% include "includes/header.html.twig" %}
+{% endblock %}
+
 {% block title %}Category
 {% endblock %}
 
 {% block body %}
-	<h1>Category</h1>
-
-	<table class="table">
-		<tbody>
-			<tr>
-				<th>Category Id</th>
-				<td>{{ category.id }}</td>
-			</tr>
-			<tr>
-				<th>Category Name</th>
-				<td>{{ category.name }}</td>
-			</tr>
-			<tr>
-				<th>Category Slug</th>
-				<td>{{ category.slug }}</td>
-			</tr>
-			<tr>
-				<th>Created at</th>
-				<td>{{ category.createdAt ? category.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-			</tr>
-			<tr>
-				<th>Updated at</th>
-				<td>{{ category.updatedAt ? category.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-			</tr>
-		</tbody>
-	</table>
-
-	{% for quiz in category.quizzes %}
-		<table class="table">
-			<tbody>
-				<tr>
-					<th>Quiz Id</th>
-					<td>{{ quiz.id }}</td>
-				</tr>
-				<tr>
-					<th>Quiz Name</th>
-					<td>{{ quiz.name }}</td>
-				</tr>
-				{# <tr>
-					<th>Slug</th>
-					<td>{{ quiz.slug }}</td>
-				</tr> #}
-				<tr>
-					<th>Created at</th>
-					<td>{{ quiz.createdAt ? quiz.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-				</tr>
-				<tr>
-					<th>Updated at</th>
-					<td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-				</tr>
-			</tbody>
-		</table>
-	{% endfor %}
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Category</h1>
 
 
-	<a href="{{ path('category_index') }}">back to list</a>
-    
-	<a href="{{ path('category_edit', {'id': category.id}) }}">edit</a>
+			<table class="table">
+				<tbody>
+					<tr>
+						<th>Category Id</th>
+						<td>{{ category.id }}</td>
+					</tr>
+					<tr>
+						<th>Category Name</th>
+						<td>{{ category.name }}</td>
+					</tr>
+					<tr>
+						<th>Category Slug</th>
+						<td>{{ category.slug }}</td>
+					</tr>
+					<tr>
+						<th>Created at</th>
+						<td>{{ category.createdAt ? category.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+					</tr>
+					<tr>
+						<th>Updated at</th>
+						<td>{{ category.updatedAt ? category.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+					</tr>
+				</tbody>
+			</table>
 
-	{{ include('category/_delete_form.html.twig') }}
+			{% for quiz in category.quizzes %}
+				<table class="table">
+					<tbody>
+						<tr>
+							<th>Quiz Id</th>
+							<td>{{ quiz.id }}</td>
+						</tr>
+						<tr>
+							<th>Quiz Name</th>
+							<td>{{ quiz.name }}</td>
+						</tr>
+						{# <tr>
+											<th>Slug</th>
+											<td>{{ quiz.slug }}</td>
+										</tr> #}
+						<tr>
+							<th>Created at</th>
+							<td>{{ quiz.createdAt ? quiz.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+						</tr>
+						<tr>
+							<th>Updated at</th>
+							<td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+						</tr>
+					</tbody>
+				</table>
+			{% endfor %}
+
+
+			<a class='btn btn-primary' href="{{ path('category_index') }}">Back To Category List</a>
+
+			<a class='btn btn-secondary' href="{{ path('category_edit', {'id': category.id}) }}">Edit</a>
+
+			{{ include('category/_delete_form.html.twig') }}
+
+		</div>
+	</div>
 {% endblock %}

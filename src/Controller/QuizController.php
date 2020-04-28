@@ -30,29 +30,8 @@ class QuizController extends AbstractController
      */
     public function index(QuizRepository $quizRepository): Response
     {
-
-        $historics = [];
-        $all_qz = $this->getDoctrine()->getManager()->getRepository(Quiz::class)->findAll();
-        foreach ($all_qz as $quiz) {
-            $id = $quiz->getId();
-            $cache = new FilesystemAdapter();
-            $cache_name = 'quiz.game.' . $id;
-            $possible_quiz = $cache->getItem($cache_name);
-
-            // ERROR : VERIFY BY historic_save for showing what is finished
-
-            if ($cache->getItem($cache_name)->isHit()) { //create game if it doesnt exist
-                array_push($historics, ['quiz_name' => $quiz->getName(), 'score' => '10/10']); //display structure
-
-                //faire un cache special scores etc comme ca pas besoin de la calculer ici
-                $possible_quiz->get()['data'];
-            }
-        }
-
-
         $historics = $this->getDoctrine()->getRepository(Historic::class)->findAll();
-
-
+        $historics = array_reverse($historics); //montrer le plus récent en premier
 
         return $this->render('quiz/index.html.twig', [
             'quizzes' => $quizRepository->findAll(),
@@ -301,7 +280,7 @@ class QuizController extends AbstractController
                 ]);
             }
         }
-        
+
         if (strtolower($request->server->get("REQUEST_METHOD")) == 'post') {
             //If method post and if game already played show score and replay button
             if (isset($request->request->all()['retake']) && $request->request->all()['retake'] == 'retake') {

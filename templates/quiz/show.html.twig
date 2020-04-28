@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% block header %}
+{% include "includes/header.html.twig" %}
+{% endblock %}
+
 {% block title %}Quiz
 {% endblock %}
 
@@ -35,12 +39,13 @@
 		</tbody>
 	</table>
 
-	<a class='btn btn-secondary'  href="{{ path('quiz_index') }}">back to list</a>
-
+<div class="d-flex flex-row bd-highlight mb-3">
+	<a class='btn btn-secondary mr-2'  href="{{ path('quiz_index') }}">Back To List</a>
 	<br>
-	<a class='btn btn-preimary'  href="{{ path('quiz_play', {'id': quiz.id}) }}">PLAY</a>
+	<a class='btn btn-success mr-2'  href="{{ path('quiz_play', {'id': quiz.id}) }}">Play</a>
 	<br>
-	<a class='btn btn-secondary'  href="{{ path('quiz_edit', {'id': quiz.id}) }}">edit</a>
+	<a class='btn btn-secondary'  href="{{ path('quiz_edit', {'id': quiz.id}) }}">Edit</a>
+</div>
 
 	{{ include('quiz/_delete_form.html.twig') }}
 {% endblock %}

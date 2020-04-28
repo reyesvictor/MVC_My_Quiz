@@ -1,52 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Quiz index{% endblock %}
+{% block header %}
+	{% include "includes/header.html.twig" %}
+{% endblock %}
+
+{% block title %}Quiz index
+{% endblock %}
 
 {% block body %}
-    <h1>Quiz index</h1>
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Quiz Page</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Data</th>
-                <th>Created_at</th>
-                <th>Updated_at</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for quiz in quizzes %}
-            <tr>
-                <td>{{ quiz.id }}</td>
-                <td>{{ quiz.name }}</td>
-                <td>{{ quiz.slug }}</td>
-                <td>{{ quiz.data }}</td>
-                <td>{{ quiz.createdAt ? quiz.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('quiz_show', {'id': quiz.id}) }}">show</a>
-                    <a href="{{ path('quiz_play', {'id': quiz.id}) }}">play</a>
-                    <a href="{{ path('quiz_edit', {'id': quiz.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a class='btn btn-primary'  href="{{ path('quiz_new') }}">Create new</a>
-
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Name</th>
+						<th>Slug</th>
+						<th>Data</th>
+						<th>Created_at</th>
+						<th>Updated_at</th>
+						<th>actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for quiz in quizzes %}
+						<tr>
+							<td>{{ quiz.id }}</td>
+							<td>{{ quiz.name }}</td>
+							<td>{{ quiz.slug }}</td>
+							<td>{{ quiz.data }}</td>
+							<td>{{ quiz.createdAt ? quiz.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+							<td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+							<td>
+								<div class="d-flex flex-row bd-highlight">
+									<a class='btn btn-secondary mr-1' href="{{ path('quiz_show', {'id': quiz.id}) }}">Show</a>
+									<a class='btn btn-success mr-1' href="{{ path('quiz_play', {'id': quiz.id}) }}">Play</a>
+									<a class='btn btn-secondary' href="{{ path('quiz_edit', {'id': quiz.id}) }}">Edit</a>
+								</div>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="7">no records found</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+	<a class='btn btn-primary' href="{{ path('quiz_new') }}">Create New Quiz</a>
+		</div>
+	</div>
 
 
 	{{ include('quiz/_show_historic.html.twig') }}
 
-
-
 {% endblock %}
-

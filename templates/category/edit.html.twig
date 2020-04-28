@@ -1,17 +1,25 @@
 {% extends 'base.html.twig' %}
 
+{% block header %}
+	{% include "includes/header.html.twig" %}
+{% endblock %}
+
 {% block title %}Edit Category
 {% endblock %}
 
 {% block body %}
-	<h1>Edit Category</h1>
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Edit Category</h1>
 
+			{{ include('includes/danger_flash.html.twig') }}
 
-	{{ include('includes/danger_flash.html.twig') }}
+			{{ include('category/_form.html.twig', {'button_label': 'Update'}) }}
 
-	{{ include('category/_form.html.twig', {'button_label': 'Update'}) }}
+			<a class='btn btn-primary' href="{{ path('category_index', {'id': category.id}) }}">Back To Category List</a>
 
-	<a href="{{ path('category_index', {'id': category.id}) }}">Back To Category List</a>
+			{{ include('category/_delete_form.html.twig') }}
 
-	{{ include('category/_delete_form.html.twig') }}
+		</div>
+	</div>
 {% endblock %}

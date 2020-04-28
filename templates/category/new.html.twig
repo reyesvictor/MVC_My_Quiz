@@ -1,11 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Category{% endblock %}
+{% block header %}
+	{% include "includes/header.html.twig" %}
+{% endblock %}
+
+{% block title %}New Category
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Category</h1>
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Create new Category</h1>
 
-    {{ include('category/_form.html.twig') }}
+			{{ include('category/_form.html.twig') }}
 
-    <a href="{{ path('category_index') }}">back to list</a>
+			<a class='btn btn-secondary' href="{{ path('category_index') }}">Back To Category List</a>
+		</div>
+	</div>
 {% endblock %}
