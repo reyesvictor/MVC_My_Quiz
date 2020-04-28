@@ -1,0 +1,25 @@
+	<div class="form-group">
+		<div class="card mb-2">
+			<div class="card-header">
+				Question
+				{{ form.vars.name + 1}}
+				{{ form_widget(form.name) }}
+			</div>
+			<div class="card-body">
+				<ul class="list-group list-group-flush">
+					{% for question in form %}
+						{% for answers in question %}
+							<li class="list-group-item">
+								Answer
+								{% for answer in answers %}
+									{% set ans =  answers.vars.name + 1 %}
+									{{form_label(answer, ans)}}
+									{{form_widget(answer)}}
+								{% endfor %}
+							</li>
+						{% endfor %}
+					{% endfor %}
+				</ul>
+			</div>
+		</p>
+	</div>

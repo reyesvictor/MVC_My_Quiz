@@ -85,6 +85,12 @@ class QuizController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->answersAreNotValid($request)) {
+                return $this->render('quiz/new.html.twig', [
+                    'quiz' => $quiz,
+                    'form' => $form->createView(),
+                ]);
+            }
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($quiz);
             // dd($quiz);
@@ -139,6 +145,14 @@ class QuizController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // dd($request->request->get('quiz')['questions']);
+            //only one option possible, for now...
+            if ($this->answersAreNotValid($request)) {
+                return $this->render('quiz/edit.html.twig', [
+                    'quiz' => $quiz,
+                    'form' => $form->createView(),
+                ]);
+            }
             // $this->getDoctrine()->getManager()->flush();
             // dd($quiz_temp);
             $entityManager = $this->getDoctrine()->getManager();
@@ -179,6 +193,29 @@ class QuizController extends AbstractController
             'quiz' => $quiz,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function answersAreNotValid($request)
+    {
+        $nbr = 0;
+        foreach ($request->request->get('quiz')['questions'] as $key => $question) {
+            $i = 0;
+            foreach ($question['answers'] as $data) {
+                if (array_key_exists("is_correct", $data)) {
+                    $i++;
+                }
+            }
+            if ($i > 1) {
+                $nbr = $key + 1;
+                $this->addFlash("danger", "Only one answer can be selected as correct for the question n°{$nbr} : \"{$question['name']}\"");
+            } else if ($i == 0) {
+                $nbr = $key + 1;
+                $this->addFlash("danger", "You must select a correct answer for the question n°{$nbr} : \"{$question['name']}\"");
+            }
+        }
+        if ($nbr > 0) {
+            return true;
+        }
     }
 
     /**
