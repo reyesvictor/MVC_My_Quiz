@@ -20,10 +20,9 @@
 	</head>
 
 	<body>
-		{% block header %}{% endblock %}
-		<div class="container-fluid">
-		{% block body %}{% endblock %}
-		</div>
-		{% block footer %}{% endblock %}
-	</body>
-</html>
+		{{ include('includes/header.html.twig') }}
+		<div class="container-fluid"> {% block body %}{% endblock %}
+			</div>
+		{# {{ include('includes/footer.html.twig') }} #}
+		</body>
+	</html>
