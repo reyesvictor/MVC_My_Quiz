@@ -3,13 +3,18 @@
 namespace App\Controller;
 
 use COM;
+use App\Entity\User;
+use App\Form\UserType;
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class HomeController extends AbstractController
 {
@@ -34,14 +39,29 @@ class HomeController extends AbstractController
         ]);
     }
 
+
     /**
-     * @Route("/hello/{name}/{age}", name="hello")
-     * @Route("/hello/")
-     * @Route("/hello/{name}")
-     * @return void
+     * Visitor can create an account
+     * 
+     * @Route("/register", name="app_register", methods={"GET","POST"})
      */
-    public function hello($name = 'Peter', $age = 10)
+    public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder): Response
     {
-        return new Response('Hello>>>' . ucfirst($name) . ' vous avez ' . $age);
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password_hashed = $encoder->encodePassword($user, $user->getPassword());
+            $user->setPassword($password_hashed);
+            $manager->persist($user);
+            $manager->flush();
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('user/new.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
     }
 }

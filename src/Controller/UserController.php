@@ -7,10 +7,12 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @Route("/user")
@@ -18,14 +20,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class UserController extends AbstractController
 {
 
-    // /**
-    //  * @Route("/login", name="user_login", methods={"GET"})
-    //  */
-    // public function login(UserRepository $userRepository): Response
-    // {
-    //     return $this->render('user/login.html.twig');
-    // }
-
+    // Le login se trouve dans SecurityController 
+    // Le register se trouve dans HomeController     
 
     /**
      * @Route("/", name="user_index", methods={"GET"})
@@ -40,17 +36,17 @@ class UserController extends AbstractController
     /**
      * @Route("/new", name="user_new", methods={"GET","POST"})
      */
-    public function new(Request $request): Response
+    public function new(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-
+            $password_hashed = $encoder->encodePassword($user, $user->getPassword());
+            $user->setPassword($password_hashed);
+            $manager->persist($user);
+            $manager->flush();  
             return $this->redirectToRoute('user_index');
         }
 
