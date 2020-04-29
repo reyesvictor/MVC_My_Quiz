@@ -32,7 +32,7 @@ class QuizController extends AbstractController
     {
         $historics = $this->getDoctrine()->getRepository(Historic::class)->findAll();
         $historics = array_reverse($historics); //montrer le plus récent en premier
-
+        
         return $this->render('quiz/index.html.twig', [
             'quizzes' => $quizRepository->findAll(),
             'historics' => $historics,

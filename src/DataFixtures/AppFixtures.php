@@ -80,9 +80,9 @@ class AppFixtures extends Fixture
     {
         $users_arr = [
             'admin',
-            'user_deleted',
+            'deletedUser',
             'Anonymous',
-            'Martin Aubry',
+            'Martine Aubry',
             'Edouard Balladur',
             'Robert Badinter',
             'Jean-Marc Ayrault',
@@ -95,12 +95,25 @@ class AppFixtures extends Fixture
             if ($i == 0) {
                 $user->setIsAdmin(1);
                 $this->registerQuizzes($user, $manager);
+            } else {
+                $user->setIsAdmin(0);
             }
+
+            if (preg_match('/\ /', $users_arr[$i])) {
+                $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])));
+            } else {
+                $user->setEmail($users_arr[$i] . '@' . preg_replace('/\_/', '', $users_arr[$i]));
+            }
+
             $user->setName($users_arr[$i])
-                ->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])))
                 ->setPassword($pwd_hashed);
             $manager->persist($user);
         }
+
+        // Next:
+        // - Customize your new authenticator.
+        // - Finish the redirect "TODO" in the App\Security\LoginFormAuthenticator::onAuthenticationSuccess() method.
+        // - Review & adapt the login template: templates/security/login.html.twig.
 
 
         // Dans la partie d’échec Harry Potter prend la place de :;Un fou;Une tour;Un pion

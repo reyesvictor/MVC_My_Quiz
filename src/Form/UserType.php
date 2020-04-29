@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class UserType extends AbstractType
 {
@@ -13,16 +14,18 @@ class UserType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('slug')
             ->add('email')
-            ->add('email_verified_at')
-            ->add('is_admin')
+            ->add('email_is_verified', CheckboxType::class, [
+                'required' => false,
+                'value' => true,
+            ])
+            // ->add('email_verified_at')
+            ->add('is_admin', CheckboxType::class, [
+                'required' => false,
+                'value' => true,
+            ])
             ->add('password')
-            ->add('remember_token')
-            ->add('created_at')
-            ->add('updated_at')
-            ->add('last_connected_at')
-        ;
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver)

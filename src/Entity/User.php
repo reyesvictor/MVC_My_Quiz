@@ -42,7 +42,7 @@ class User implements UserInterface
     private $email_verified_at;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="boolean", nullable=true, options={"default": 0})
      */
     private $is_admin;
 
@@ -81,6 +81,10 @@ class User implements UserInterface
      */
     private $quizzes;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default": 0})
+     */
+    private $email_is_verified = 0;
 
     /**
      * 
@@ -91,14 +95,14 @@ class User implements UserInterface
      */
     public function createSlug()
     {
-        if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->name);
-        }
+        $slugify = new Slugify();
+        $this->slug = $slugify->slugify($this->name);
+        return $this;
     }
 
     public function __construct()
     {
+        $this->updated_at = new \DateTime();
         $this->historics = new ArrayCollection();
         $this->quizzes = new ArrayCollection();
     }
@@ -149,7 +153,7 @@ class User implements UserInterface
         return $this->email_verified_at;
     }
 
-    public function setEmailVerifiedAt(?\DateTimeInterface $email_verified_at): self
+    public function setEmailVerifiedAt(?\DateTimeInterface $email_verified_at = null): self
     {
         $this->email_verified_at = $email_verified_at;
 
@@ -309,16 +313,33 @@ class User implements UserInterface
      * Implementing UserInterface methods
      */
 
-     public function getRoles()
-     {
-         return ['ROLE_USER'];
-     }
+    public function getRoles()
+    {
+        return ['ROLE_USER'];
+    }
 
-     public function getSalt() {}
+    public function getSalt()
+    {
+    }
 
-     public function getUsername(){
+    public function getUsername()
+    {
         return $this->email;
+    }
+
+    public function eraseCredentials()
+    {
+    }
+
+     public function getEmailIsVerified(): ?bool
+     {
+         return $this->email_is_verified;
      }
 
-     public function eraseCredentials() {}
+     public function setEmailIsVerified(?bool $email_is_verified): self
+     {
+         $this->email_is_verified = $email_is_verified;
+
+         return $this;
+     }
 }

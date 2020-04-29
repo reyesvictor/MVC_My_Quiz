@@ -15,22 +15,35 @@
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="{{ path("quiz_index") }}">Quiz<a></li>
-					<li class="nav-item">
-						<a class="nav-link" href="{{path("user_login")}}">Login</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">My Account</a>
-					</li>
-					{% if admin is defined %}
-						<li class="nav-item">
-							<a class="nav-link" href="#">Admin</a>
-						</li>
-					{% endif %}
 				</ul>
-				<form class="form-inline my-2 my-lg-0">
-					<input class="form-control mr-sm-2" type="text" placeholder="Search">
-					<button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-				</form>
+				{% if app.user %}
+					<ul class="navbar-nav ml-auto">
+						<li class="nav-item float-right">
+							<a class="nav-link" href="{{path('user_show', {'id': app.user.id})}}">My Account:
+								{{app.user.username}}</a>
+						</li>
+						<li class="nav-item  mr-sm-2">
+							<a class="nav-link" href="{{ path('app_logout') }}">Logout</a>
+						</li>
+					{% else %}
+						<ul class="navbar-nav ml-auto">
+							<li class="nav-item">
+								<a class="nav-link" href="{{path("app_login")}}">Login</a>
+							</li>
+						{% endif %}
+						{% if admin is defined %}
+							<li class="nav-item">
+								<a class="nav-link" href="#">Admin</a>
+							</li>
+						</ul>
+				{% else %}
+					</ul>
+					{# Close the right navbar #}
+				{% endif %}
+				{# <form class="form-inline my-2 my-lg-0">
+									<input class="form-control mr-sm-2" type="text" placeholder="Search">
+									<button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+								</form> #}
 			</li>
 		</div>
 	</nav>
