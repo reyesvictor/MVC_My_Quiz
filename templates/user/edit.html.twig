@@ -10,8 +10,6 @@
 		<div class="card-body">
 			<h1 class="card-title">Edit User</h1>
 
-			{{ include('includes/danger_flash.html.twig') }}
-
 			{{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
 
 			<a class='btn btn-secondary mt-1' href="{{ path('user_index') }}">Back to Users List</a>

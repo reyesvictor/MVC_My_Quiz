@@ -284,10 +284,6 @@ class QuizController extends AbstractController
             }
         }
         if (!$cache->getItem($cache_name)->isHit()) { //create game if it doesnt exist
-            echo 'New Game';
-            echo '<br>';
-            echo 'Registrating quiz data to begin';
-            echo '<br>';
             $productsCount = $cache->getItem($cache_name);
             $productsCount->set([
                 'quiz_id' => $quiz->getId(),
@@ -327,8 +323,6 @@ class QuizController extends AbstractController
                 ]);
             }
 
-            echo 'this is post';
-            echo '<br>';
             if (count($request->request->all()) == 0) {
                 // dd($request->request->all());
                 $this->addFlash('danger', 'You must submit an answer.');
@@ -383,6 +377,7 @@ class QuizController extends AbstractController
                 }
             }
         }
+        // dd($qst_key, $quiz, $questions, $productsCount); 
         return $this->render('quiz/play.html.twig', [
             'quiz' => $quiz,
             'questions' => $questions,
@@ -424,7 +419,6 @@ class QuizController extends AbstractController
 
     private function getScore($questions, $answers_from_user)
     {
-        echo 'quiz already played';
         $score = 0;
         foreach ($questions as $key => $question) {
             foreach ($question->getAnswers() as $answer) {

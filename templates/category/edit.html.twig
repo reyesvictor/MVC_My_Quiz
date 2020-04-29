@@ -8,8 +8,6 @@
 		<div class="card-body">
 			<h1 class="card-title">Edit Category</h1>
 
-			{{ include('includes/danger_flash.html.twig') }}
-
 			{{ include('category/_form.html.twig', {'button_label': 'Update'}) }}
 
 			<a class='btn btn-primary' href="{{ path('category_index', {'id': category.id}) }}">Back To Category List</a>

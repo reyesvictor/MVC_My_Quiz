@@ -7,10 +7,16 @@ use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  * @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ * fields={"name"},
+ * message="Another category already uses this name"
+ * )
  */
 class Category
 {
@@ -22,6 +28,8 @@ class Category
     private $id;
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="You must enter a category name")
+     * @Assert\Length(min=3, max=20, minMessage="The category name is too short...", maxMessage="The category name is too long !")
      */
     private $name;
 

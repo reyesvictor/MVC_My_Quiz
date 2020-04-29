@@ -8,8 +8,6 @@
 		<div class="card-body">
 			<h1 class="card-title">User</h1>
 
-			{{ include('includes/danger_flash.html.twig') }}
-
 			<table class="table">
 				<tbody>
 					<tr>
@@ -61,7 +59,9 @@
 
 			<a class="btn btn-secondary" href="{{ path('user_index') }}">Back To Users List</a>
 
-			<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit</a>
+			<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
+
+			<a class="btn btn-primary" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
 
 			{{ include('user/_delete_form.html.twig') }}
 

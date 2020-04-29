@@ -20,6 +20,8 @@
 			<h1>Hello
 				{{ controller_name }}! ✅</h1>
 
+			{{dump(app.user)}}
+
 			This friendly message is coming from:
 			<ul>
 				<li>Your controller at
@@ -30,6 +32,11 @@
 				<li>Your template at
 					<code>
 						<a href="{{ '/mnt/c/xampp/htdocs/myquiz/templates/home/index.html.twig'|file_link(0) }}">templates/home/index.html.twig</a>
+					</code>
+				</li>
+				<li>Delete Quiz Cache
+					<code>
+						<a class="btn btn-secondary" href="{{ path('app_cache_delete') }}">Delete</a>
 					</code>
 				</li>
 			</ul>

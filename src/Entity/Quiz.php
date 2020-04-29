@@ -6,7 +6,6 @@ use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -32,40 +31,42 @@ class Quiz
      * @Assert\Length(min=3, max=100, minMessage="The name is too short...", maxMessage="The name is too long !")
      */
     private $name;
-
+    
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $slug;
-
+    
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="quizzes")
      * @ORM\JoinColumn(nullable=false)
      */
     private $category;
-
+    
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Length(min=3, max=30, minMessage="The description is too short...", maxMessage="The description is too long !")
      */
     private $data;
-
+    
     /**
      * @ORM\Column(type="datetime")
      */
     private $created_at;
-
+    
     /**
      * @ORM\Column(type="datetime")
      */
     private $updated_at;
-
+    
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
      */
     private $historics;
-
+    
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
+
      */
     private $questions;
 

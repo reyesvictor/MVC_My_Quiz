@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\EqualTo;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -16,16 +17,18 @@ class UserType extends AbstractType
         $builder
             ->add('name')
             ->add('email')
+            ->add('password', PasswordType::class)
+            ->add('passwordConfirm', PasswordType::class, [
+                'label' => 'Confirm your password',
+            ])
             ->add('email_is_verified', CheckboxType::class, [
                 'required' => false,
                 'value' => true,
             ])
-            // ->add('email_verified_at')
             ->add('is_admin', CheckboxType::class, [
                 'required' => false,
                 'value' => true,
             ])
-            ->add('password', PasswordType::class)
             ;
     }
 

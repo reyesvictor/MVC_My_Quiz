@@ -1,7 +1,7 @@
 {{ form_start(form) }}
 {# {{ form_widget(form) }} #}
 
-<div class="card text-white bg-info mb-3">
+<div class="card text-black bg-light mb-3">
 	<div class="card-header">User Information</div>
 	<div class="card-body">
 		{{ form_label(form.name)}}
@@ -9,8 +9,10 @@
 		{{ form_label(form.email)}}
 		{{ form_widget(form.email, {'attr': {'class':'form-control', 'value': user.email}  })  }}
 		{{ form_label(form.password)}}
-		{{ form_widget(form.password, {'attr': {'class':'form-control', 'value': user.password}  })  }}
-        {{ form_widget(form._token) }}
+		{{ form_widget(form.password, {'attr': {'class':'form-control'}  })  }}
+		{{ form_label(form.passwordConfirm)}}
+		{{ form_widget(form.passwordConfirm, {'attr': {'class':'form-control', 'value': user.passwordConfirm}  })  }}
+		{{ form_widget(form._token) }}
 	</div>
 </div>
 <div class="card text-white bg-warning mb-3">
@@ -23,5 +25,5 @@
 	</div>
 </div>
 <button class="btn btn-primary">{{ button_label|default('Save') }}</button>
-{{ form_errors(form) }} 
+{{ form_errors(form) }}
 {{ form_end(form, {'render_rest': false}) }}

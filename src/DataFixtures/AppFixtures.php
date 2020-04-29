@@ -85,8 +85,10 @@ class AppFixtures extends Fixture
             'Martine Aubry',
             'Edouard Balladur',
             'Robert Badinter',
+            'Nadine Morano',
             'Jean-Marc Ayrault',
             'Benoit Hamon',
+            'Christine Boutin',
         ];
 
         for ($i = 0; $i < count($users_arr); $i++) {

@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+use DateTime;
 use App\Entity\Quiz;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Entity\UpdatePassword;
+use App\Form\UpdatePasswordType;
 use App\Repository\UserRepository;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,7 +50,8 @@ class UserController extends AbstractController
             $password_hashed = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password_hashed);
             $manager->persist($user);
-            $manager->flush();  
+            $manager->flush();
+            $this->addFlash('success', "The user {$user->getName()} has been created");
             return $this->redirectToRoute('user_index');
         }
 
@@ -69,12 +74,14 @@ class UserController extends AbstractController
     /**
      * @Route("/{id}/edit", name="user_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, User $user): Response
+    public function edit(Request $request, User $user, UserPasswordEncoderInterface $encoder): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
         // dd($request->request,$form->isSubmitted(), $form->isValid());
         if ($form->isSubmitted() && $form->isValid()) {
+            $password_hashed = $encoder->encodePassword($user, $user->getPassword());
+            $user->setPassword($password_hashed);
             $this->getDoctrine()->getManager()->flush();
 
             //also verify if is admin
@@ -130,6 +137,37 @@ class UserController extends AbstractController
             $entityManager->flush();
         }
 
+        return $this->redirectToRoute('user_index');
+    }
+
+    /**
+     * @Route("/{id}/update-password", name="user_update_password", methods={"GET", "POST"})
+     */
+    public function updatePassword(User $user, Request $request, UserPasswordEncoderInterface $encoder, ObjectManager $manager): Response
+    {
+        $pwdUpdt = new UpdatePassword();
+
+        $form = $this->createForm(UpdatePasswordType::class, $pwdUpdt);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // dd($pwdUpdt, $user->getPassword(), password_verify($pwdUpdt->getOldPassword(), $user->getPassword()));
+            if(!password_verify($pwdUpdt->getOldPassword(), $user->getPassword())) {
+                $form->get('oldPassword')->addError(new FormError('Your password is not valid.'));
+            } else {
+                $new = $pwdUpdt->getNewPassword();
+                $pwd_hashed = $encoder->encodePassword($user, $new);
+                $user->setPassword($pwd_hashed);
+                $manager->persist($user);
+                $manager->flush();
+                $this->addFlash('success', 'Password has been updated.');
+            }
+        }
+
+        return $this->render('user/password_update.html.twig', [
+            'form' => $form->createView(),
+        ]);
         return $this->redirectToRoute('user_index');
     }
 }

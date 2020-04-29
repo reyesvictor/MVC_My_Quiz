@@ -5,6 +5,9 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
@@ -20,17 +23,21 @@ class Question
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\All({
+     *  @Assert\Length(min=3, max=50, minMessage="The question is too short...", maxMessage="The question is too long !") 
+     * })
      */
     private $name;
-
+    
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions", cascade={"remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $quiz;
-
+    
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Answer", mappedBy="question", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
+     * @Assert\Length(min=3, max=100, minMessage="The answer is too short...", maxMessage="The answer is too long !")
      */
     private $answers;
 

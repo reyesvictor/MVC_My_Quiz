@@ -6,11 +6,17 @@ use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ * fields={"email"},
+ * message="Another user is registered with this email"
+ * )
  */
 class User implements UserInterface
 {
@@ -23,6 +29,8 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="You must enter a name")
+     * @Assert\Length(min=4, minMessage="You must enter a name of at least 4 characters")
      */
     private $name;
 
@@ -33,6 +41,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\Email(message="Please enter a valid email")
      */
     private $email;
 
@@ -48,8 +57,17 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=4, minMessage="Your password must at least be 4 characters long")
      */
     private $password;
+
+    /**
+     *
+     * @Assert\EqualTo(propertyPath="password", message="Password confirmation do not correspond")
+     * 
+     * @var string
+     */
+    public $passwordConfirm;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -100,9 +118,21 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * 
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     * 
+     * @return void
+     */
+    public function updateTime()
+    {
+        $this->updated_at = new \DateTime('now');
+        return $this;
+    }
+
     public function __construct()
     {
-        $this->updated_at = new \DateTime();
         $this->historics = new ArrayCollection();
         $this->quizzes = new ArrayCollection();
     }
@@ -331,15 +361,15 @@ class User implements UserInterface
     {
     }
 
-     public function getEmailIsVerified(): ?bool
-     {
-         return $this->email_is_verified;
-     }
+    public function getEmailIsVerified(): ?bool
+    {
+        return $this->email_is_verified;
+    }
 
-     public function setEmailIsVerified(?bool $email_is_verified): self
-     {
-         $this->email_is_verified = $email_is_verified;
+    public function setEmailIsVerified(?bool $email_is_verified): self
+    {
+        $this->email_is_verified = $email_is_verified;
 
-         return $this;
-     }
+        return $this;
+    }
 }
