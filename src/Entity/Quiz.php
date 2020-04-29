@@ -69,10 +69,17 @@ class Quiz
      */
     private $questions;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="quizzes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $author;
+
     public function __construct()
     {
         $this->historics = new ArrayCollection();
         $this->questions = new ArrayCollection();
+        $this->quizzes = new ArrayCollection();
     }
 
     /**
@@ -234,6 +241,31 @@ class Quiz
                 $question->setQuizId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function removeQuiz(self $quiz): self
+    {
+        if ($this->quizzes->contains($quiz)) {
+            $this->quizzes->removeElement($quiz);
+            // set the owning side to null (unless already changed)
+            if ($quiz->getAuthor() === $this) {
+                $quiz->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
 
         return $this;
     }

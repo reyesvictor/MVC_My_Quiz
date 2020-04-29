@@ -6,12 +6,13 @@ use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\HasLifecycleCallbacks
  */
-class User
+class User implements UserInterface
 {
     /**
      * @ORM\Id()
@@ -75,6 +76,11 @@ class User
      */
     private $historics;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Quiz", mappedBy="author")
+     */
+    private $quizzes;
+
 
     /**
      * 
@@ -94,6 +100,7 @@ class User
     public function __construct()
     {
         $this->historics = new ArrayCollection();
+        $this->quizzes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -265,4 +272,53 @@ class User
 
         return $this;
     }
+
+    /**
+     * @return Collection|Quiz[]
+     */
+    public function getQuizzes(): Collection
+    {
+        return $this->quizzes;
+    }
+
+    public function addQuiz(Quiz $quiz): self
+    {
+        if (!$this->quizzes->contains($quiz)) {
+            $this->quizzes[] = $quiz;
+            $quiz->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuiz(Quiz $quiz): self
+    {
+        if ($this->quizzes->contains($quiz)) {
+            $this->quizzes->removeElement($quiz);
+            // set the owning side to null (unless already changed)
+            if ($quiz->getAuthor() === $this) {
+                $quiz->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Implementing UserInterface methods
+     */
+
+     public function getRoles()
+     {
+         return ['ROLE_USER'];
+     }
+
+     public function getSalt() {}
+
+     public function getUsername(){
+        return $this->email;
+     }
+
+     public function eraseCredentials() {}
 }

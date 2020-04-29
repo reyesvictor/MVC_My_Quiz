@@ -207,10 +207,10 @@ class QuizController extends AbstractController
             }
             if ($i > 1) {
                 $nbr = $key + 1;
-                $this->addFlash("danger", "Only one answer can be selected as correct for the question n°{$nbr} : \"{$question['name']}\"");
+                $this->addFlash("danger", "Only one answer can be selected as correct for the question n° {$nbr} : \"{$question['name']}\"");
             } else if ($i == 0) {
                 $nbr = $key + 1;
-                $this->addFlash("danger", "You must select a correct answer for the question n°{$nbr} : \"{$question['name']}\"");
+                $this->addFlash("danger", "You must select a correct answer for the question n° {$nbr} : \"{$question['name']}\"");
             }
         }
         if ($nbr > 0) {

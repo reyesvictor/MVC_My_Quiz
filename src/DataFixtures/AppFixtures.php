@@ -10,102 +10,77 @@ use App\Entity\Question;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType as DateTimeType;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
-    public function load(ObjectManager $manager)
-    {
-        // $product = new Product();
-        // $manager->persist($product);
 
-        $arr = [
+    private $content = [
 
-            //refaire tout
-            //dabord une cateogie FILM
-            //dans film on met un quiz harry potter
-            //dans ce quiz on met plusieurs questions
-            //dans ces questions on met plusieurs reponses
-            //donc il faut que je crée une entity question
-            //avec une relation onetomany Question->Quiz
-            //et une entity reponse avec un tinyint
-            //relation onetomany Answer->Question
-            //ou tout foutre dans un tableau MDR
+        //refaire tout
+        //dabord une cateogie FILM
+        //dans film on met un quiz harry potter
+        //dans ce quiz on met plusieurs questions
+        //dans ces questions on met plusieurs reponses
+        //donc il faut que je crée une entity question
+        //avec une relation onetomany Question->Quiz
+        //et une entity reponse avec un tinyint
+        //relation onetomany Answer->Question
+        //ou tout foutre dans un tableau MDR
 
-            //Categorie => [
-            //     Quiz => [
-            //         Question => [
-            //             reponses => true/false
-            //         ]
-            //     ]
-            // ]
-            'Films' => [
-                'Harry Potter' => [
-                    'Dans la partie d’échec Harry Potter prend la place de :' => [
-                        'Un fou' => true,
-                        'Une tour' => false,
-                        'Un pion' => false,
-                    ],
-                    'Quel est le mot de passe du bureau de Dumbledore ?' => [
-                        'Chocogrenouille' => false,
-                        'Sorbet Citron' => true,
-                        'Dragées Surprise' => false,
-                    ]
+        //Categorie => [
+        //     Quiz => [
+        //         Question => [
+        //             reponses => true/false
+        //         ]
+        //     ]
+        // ]
+        'Films' => [
+            'Harry Potter' => [
+                'Dans la partie d’échec Harry Potter prend la place de :' => [
+                    'Un fou' => true,
+                    'Une tour' => false,
+                    'Un pion' => false,
                 ],
+                'Quel est le mot de passe du bureau de Dumbledore ?' => [
+                    'Chocogrenouille' => false,
+                    'Sorbet Citron' => true,
+                    'Dragées Surprise' => false,
+                ]
             ],
-            'Sigles' => [
-                'Sigles Français' => [
-                    'Que signifie CROUS ?' => [
-                        "Centre de Restauration et d'Organisation Universitaire et Secondaire" => false,
-                        "Comité Régional pour l'Organisation Universitaire et Scolaire" => false,
-                        "Centre Régional des Oeuvres Universitaires et Scolaires" => true,
-                    ]
+        ],
+        'Sigles' => [
+            'Sigles Français' => [
+                'Que signifie CROUS ?' => [
+                    "Centre de Restauration et d'Organisation Universitaire et Secondaire" => false,
+                    "Comité Régional pour l'Organisation Universitaire et Scolaire" => false,
+                    "Centre Régional des Oeuvres Universitaires et Scolaires" => true,
                 ]
             ]
-            // 'Définitions de mots',
-            // 'Les spécialités culinaires',
-            // 'Séries TV : Les Simpson - partie 1',
-            // 'Séries TV : Les Simpson - partie 2',
-            // 'Séries TV : Stargate SG1',
-            // 'Séries TV : NCIS',
-            // 'Jeux de société',
-            // 'Programmation',
-            // 'Sigles Informatiques',
-        ];
-        // for ($i = 0; $i < count($cat_arr); $i++) {
-        foreach ($arr as $cat_name => $quiz) {
-            $category_obj = new Category();
-            if (!is_array($quiz)) {
-                $category_obj->setName($quiz);
-            } else {
-                $category_obj->setName($cat_name);
-            }
+        ]
+        // 'Définitions de mots',
+        // 'Les spécialités culinaires',
+        // 'Séries TV : Les Simpson - partie 1',
+        // 'Séries TV : Les Simpson - partie 2',
+        // 'Séries TV : Stargate SG1',
+        // 'Séries TV : NCIS',
+        // 'Jeux de société',
+        // 'Programmation',
+        // 'Sigles Informatiques',
+    ];
+    private $encoder;
 
-            if (isset($quiz) && is_array($quiz)) {
-                foreach ($quiz as $name => $data) {
-                    $quiz_obj = new Quiz();
-                    $quiz_obj->setName($name)
-                        ->setData('Description faite dans AppFixtures')
-                        ->setCategory($category_obj);
-                    foreach ($data as $question_name => $answers) {
-                        $question_obj = new Question();
-                        $question_obj->setName($question_name)
-                            ->setQuizId($quiz_obj);
-                        foreach ($answers as $answer => $value) {
-                            $answer_obj = new Answer();
-                            $answer_obj->setName($answer)
-                                ->setQuestionId($question_obj)
-                                ->setIsCorrect($value);
-                            $manager->persist($answer_obj);
-                        }
-                        $manager->persist($question_obj);
-                    }
-                    $manager->persist($quiz_obj);
-                }
-            }
-            $manager->persist($category_obj);
-        }
+    public function __construct(UserPasswordEncoderInterface $encoder)
+    {
+        $this->encoder = $encoder;
+    }
 
+    public function load(ObjectManager $manager)
+    {
         $users_arr = [
+            'admin',
+            'user_deleted',
             'Anonymous',
             'Martin Aubry',
             'Edouard Balladur',
@@ -116,9 +91,14 @@ class AppFixtures extends Fixture
 
         for ($i = 0; $i < count($users_arr); $i++) {
             $user = new User();
+            $pwd_hashed = $this->encoder->encodePassword($user, 'root');
+            if ($i == 0) {
+                $user->setIsAdmin(1);
+                $this->registerQuizzes($user, $manager);
+            }
             $user->setName($users_arr[$i])
                 ->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])))
-                ->setPassword('root');
+                ->setPassword($pwd_hashed);
             $manager->persist($user);
         }
 
@@ -140,5 +120,42 @@ class AppFixtures extends Fixture
         // $quiz = new Quiz();
         // $quiz->
         $manager->flush();
+    }
+
+    private function registerQuizzes(User $user, ObjectManager $manager)
+    {
+        foreach ($this->content as $cat_name => $quiz) {
+            $category_obj = new Category();
+            if (!is_array($quiz)) {
+                $category_obj->setName($quiz);
+            } else {
+                $category_obj->setName($cat_name);
+            }
+
+            if (isset($quiz) && is_array($quiz)) {
+                foreach ($quiz as $name => $data) {
+                    $quiz_obj = new Quiz();
+                    $quiz_obj->setName($name)
+                        ->setData('Description faite dans AppFixtures')
+                        ->setCategory($category_obj)
+                        ->setAuthor($user);
+                    foreach ($data as $question_name => $answers) {
+                        $question_obj = new Question();
+                        $question_obj->setName($question_name)
+                            ->setQuizId($quiz_obj);
+                        foreach ($answers as $answer => $value) {
+                            $answer_obj = new Answer();
+                            $answer_obj->setName($answer)
+                                ->setQuestionId($question_obj)
+                                ->setIsCorrect($value);
+                            $manager->persist($answer_obj);
+                        }
+                        $manager->persist($question_obj);
+                    }
+                    $manager->persist($quiz_obj);
+                }
+            }
+            $manager->persist($category_obj);
+        }
     }
 }
