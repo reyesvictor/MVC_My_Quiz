@@ -6,9 +6,13 @@ use COM;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Category;
+use App\Form\UserRegisterType;
+use Symfony\Component\Mime\Address;
 use App\Repository\CategoryRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Core\Security;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,7 +60,7 @@ class HomeController extends AbstractController
      * 
      * @Route("/register", name="app_register", methods={"GET","POST"})
      */
-    public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder): Response
+    public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder, MailerInterface $mailer): Response
     {
         if ($this->security->getUser() !== null) {
             $this->addFlash('success', 'You are connected. Logout to register');
@@ -64,7 +68,7 @@ class HomeController extends AbstractController
         }
 
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserRegisterType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -73,6 +77,27 @@ class HomeController extends AbstractController
             $manager->persist($user);
             $manager->flush();
             $this->addFlash('success', "You are registered. Please login.");
+
+            //send email to confirm user email
+            $email = (new TemplatedEmail())
+            ->from('hello@example.com')
+            // ->to('you@example.com')
+            ->to(new Address('ryan@example.com'))
+            //->cc('cc@example.com')
+            //->bcc('bcc@example.com')
+            //->replyTo('fabien@example.com')
+            //->priority(Email::PRIORITY_HIGH)
+            ->subject('Thanks for signing up!')
+            // ->text('Sending emails is fun again!')
+            // ->html('<p>See Twig integration for better HTML integration!</p>')
+            ->htmlTemplate('mail/confirm_email.html.twig')
+            // pass variables (name => value) to the template
+            ->context([
+              'expiration_date' => new \DateTime('+7 days'),
+              'username' => 'foo',
+            ]);
+            $mailer->send($email);
+      
             return $this->redirectToRoute('app_login');
         }
 

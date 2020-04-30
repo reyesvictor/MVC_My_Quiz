@@ -1,0 +1,29 @@
+{{ form_start(form) }}
+{# {{ form_widget(form) }} #}
+
+<div class="card text-black bg-light mb-3">
+	<div class="card-header">User Information</div>
+	<div class="card-body">
+		{{ form_label(form.name)}}
+		{{ form_widget(form.name, {'attr': {'class':'form-control', 'value': user.name}  })  }}
+		{{ form_label(form.email)}}
+		{{ form_widget(form.email, {'attr': {'class':'form-control', 'value': user.email}  })  }}
+		{{ form_label(form.password)}}
+		{{ form_widget(form.password, {'attr': {'class':'form-control'}  })  }}
+		{{ form_label(form.passwordConfirm)}}
+		{{ form_widget(form.passwordConfirm, {'attr': {'class':'form-control', 'value': user.passwordConfirm}  })  }}
+		{{ form_widget(form._token) }}
+	</div>
+</div>
+<div class="card text-white bg-warning mb-3">
+	<div class="card-header">User Information - For Admins Only</div>
+	<div class="card-body">
+		{{ form_label(form.email_is_verified)}}
+		{{ form_widget(form.email_is_verified, {'attr': {'value': user.emailIsVerified}  })  }}
+		{{ form_label(form.is_admin)}}
+		{{ form_widget(form.is_admin, {'attr': {'value': user.isAdmin}  })  }}
+	</div>
+</div>
+<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
+{{ form_errors(form) }}
+{{ form_end(form, {'render_rest': false}) }}
