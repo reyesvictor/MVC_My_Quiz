@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use DateTime;
 use App\Entity\Quiz;
+use App\Entity\Role;
 use App\Entity\User;
 use App\Entity\Answer;
 use App\Entity\Category;
@@ -93,15 +94,21 @@ class AppFixtures extends Fixture
             'Christine Boutin',
             'Catherine deMedicis',
         ];
-   
+
         for ($i = 0; $i < count($users_arr); $i++) {
             $user = new User();
             $pwd_hashed = $this->encoder->encodePassword($user, 'root');
             if ($i == 0 || $i == 1 || $i == 2) {
-                if ( $i == 0 ) {
-                    $user->setIsAdmin(1);
+                if ($i == 0) {
+
+                    $adminRole = new Role();
+                    $adminRole->setTitle('ROLE_ADMIN');
+                    $manager->persist($adminRole);
+
+                    $user->setIsAdmin(1)
+                        ->addUserRoles($adminRole);
                     $this->registerQuizzes($user, $manager);
-                } 
+                }
                 $user->setEmailIsVerified(1);
                 $user->setEmailVerifiedAt(new \DateTime('now'));
             }
@@ -147,9 +154,7 @@ class AppFixtures extends Fixture
             if ($vKey->isHit()) {
                 $cache->deleteItem('key.verification.' . $i);
             }
-
         }
-
     }
 
     private function registerQuizzes(User $user, ObjectManager $manager)
