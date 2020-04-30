@@ -92,7 +92,7 @@ class AppFixtures extends Fixture
             'Christine Boutin',
             'Catherine deMedicis',
         ];
-
+   
         for ($i = 0; $i < count($users_arr); $i++) {
             $user = new User();
             $pwd_hashed = $this->encoder->encodePassword($user, 'root');
