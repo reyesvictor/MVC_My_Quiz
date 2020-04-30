@@ -10,9 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\Util\TargetPathTrait;   
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -107,14 +108,25 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
 
 
+        //verify if account confirmed
+        $id = $token->getUser()->getId();
+        $cache = new FilesystemAdapter();
+        $productsCount = $cache->getItem('key.verification.' . $id);
+        if ($productsCount->isHit()) { //if cache exists, user isnt verified
+            $session = new Session();
+            $session->getFlashbag()->add('warning', 'Check your mails. You need to verify your email to log in.');
+            return new RedirectResponse($this->urlGenerator->generate('app_logout'));
+        }
+
+
         //Update last_connected_at
-        if( ($user = $token->getUser()) !== null && $token->getUser()->getId() !== null ) {
+        if (($user = $token->getUser()) !== null && $id !== null) {
             return new RedirectResponse($this->urlGenerator->generate('user_updateLastConnectedAt'));
         }
         // dd($request->request, $token, $providerKey, $user->getLastConnectedAt());
-        
+
         //Increase value of unique visitors???
-        
+
         // $session = new Session();
         // $session->getFlashbag()->add('success', 'You are logged in. Yeah !');
         // return new RedirectResponse($this->urlGenerator->generate('homepage'));

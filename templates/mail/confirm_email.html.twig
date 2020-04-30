@@ -74,20 +74,21 @@
 </style>
 
 
-<h1>Welcome 
-	{{ email.toName }} !</h1>
-
-{{dump(email)}}
-<p>
-	You signed up as
+<h1>Welcome
 	{{ username }}
-	with this mail:
+	!</h1>
+
+<p>
+	You signed up 
+		with this mail:
 </p>
 <p>
 	<code>{{ email.to[0].address }}</code>
 </p>
+<p>You need to confirm your email to validate your account:
+</p>
 
-<a href="" class="btn btn-default">Confirm my email</a>
+<a href="https://127.0.0.1:8000/verify/{{ id }}/{{ vkey }}" class="btn btn-default">Confirm my email</a>
 
 <p>After this you can log in, create your quizzes, see your historic and more !</p>
 

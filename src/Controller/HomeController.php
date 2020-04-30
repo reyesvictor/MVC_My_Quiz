@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\Security;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -72,32 +73,35 @@ class HomeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // dd($user);
             $password_hashed = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password_hashed);
             $manager->persist($user);
             $manager->flush();
             $this->addFlash('success', "You are registered. Please login.");
 
+            //generate authentification key and store it in cache
+            $id = $user->getId();
+            $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
+            $cache = new FilesystemAdapter();
+            $productsCount = $cache->getItem('key.verification.' . $id);
+            $productsCount->set($vkey);
+            $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
+
             //send email to confirm user email
             $email = (new TemplatedEmail())
-            ->from('hello@example.com')
-            // ->to('you@example.com')
-            ->to(new Address('ryan@example.com'))
-            //->cc('cc@example.com')
-            //->bcc('bcc@example.com')
-            //->replyTo('fabien@example.com')
-            //->priority(Email::PRIORITY_HIGH)
-            ->subject('Thanks for signing up!')
-            // ->text('Sending emails is fun again!')
-            // ->html('<p>See Twig integration for better HTML integration!</p>')
-            ->htmlTemplate('mail/confirm_email.html.twig')
-            // pass variables (name => value) to the template
-            ->context([
-              'expiration_date' => new \DateTime('+7 days'),
-              'username' => 'foo',
-            ]);
+                ->from('admin@admin.fr')
+                ->to(new Address($user->getEmail()))
+                ->subject('Thanks for signing up!')
+                ->htmlTemplate('mail/confirm_email.html.twig')
+                ->context([
+                    'expiration_date' => new \DateTime('+7 days'),
+                    'username' => $user->getName(),
+                    'id' => $id,
+                    'vkey' => $vkey,
+                ]);
             $mailer->send($email);
-      
+            $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
             return $this->redirectToRoute('app_login');
         }
 
@@ -115,15 +119,60 @@ class HomeController extends AbstractController
     public function deleteQuizCache()
     {
         $cache = new FilesystemAdapter();
-
-        for ($i = 0; $i < 100; $i++) {
-
+        for ($i = 0; $i < 1000; $i++) {
             $productsCount = $cache->getItem('quiz.game.' . $i);
             if ($productsCount->isHit()) {
                 $cache->deleteItem('quiz.game.' . $i);
             }
         }
-        $this->addFlash('success', 'All cache was deleted');
+        $this->addFlash('info', 'All quiz cache was deleted');
         return $this->redirectToRoute('homepage');
+    }
+
+
+    /**
+     * Delete All verification key from From Cache. It resets if fixture sur loaded
+     * 
+     * @Route("/delete_cache_key", name="app_cache_delete_key", methods={"GET","POST"})
+     */
+    public function deleteVKeyCache()
+    {
+        $cache = new FilesystemAdapter();
+        for ($i = 0; $i < 1000; $i++) {
+            $productsCount = $cache->getItem('key.verification.' . $i);
+            if ($productsCount->isHit()) {
+                $cache->deleteItem('key.verification.' . $i);
+            }
+        }
+        $this->addFlash('warning', 'All key verification cache was deleted');
+        return $this->redirectToRoute('homepage');
+    }
+
+
+    /**
+     * Verify User
+     * 
+     * @Route("/verify/{id}/{vkey}", name="app_verify_user", methods={"GET","POST"})
+     */
+    public function verifyUser(User $user, $vkey, ObjectManager $manager)
+    {
+        $id = $user->getId();
+        $cache = new FilesystemAdapter();
+        $productsCount = $cache->getItem('key.verification.' . $id);
+        if ($productsCount->isHit()) { //if cache exists, user isnt verified
+            $cache->deleteItem('key.verification.' . $id);
+            $user->setEmailIsVerified(1);
+            $user->setEmailVerifiedAt(new \DateTime('now'));
+            $manager->persist($user);
+            $manager->flush();
+            $this->addFlash('success', 'Your email is now verified. You can log in !');
+            return $this->redirectToRoute('app_login');
+        } else if ($user->getEmailIsVerified()) {
+            $this->addFlash('info', 'Your email is already verified.');
+            return $this->redirectToRoute('app_login');
+        } else {
+            $this->addFlash('warning', 'This link is not valid.');
+            return $this->redirectToRoute('app_register');
+        }
     }
 }

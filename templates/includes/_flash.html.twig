@@ -1,15 +1,11 @@
 {% if app.flashes is defined %}
-	{% if app.flashes %}
-
-		{% for label, messages in app.flashes %}
-			<div class="container">
-				<div class="alert alert-{{ label }}">
-					{% for message in messages %}
-						<p>{{ message | raw }}</p>
-					{% endfor %}
-				</div>
+	{% for label, messages in app.flashes %}
+		<div class="container">
+			<div class="alert alert-{{ label }}">
+				{% for message in messages %}
+					<p>{{ message | raw }}</p>
+				{% endfor %}
 			</div>
-		{% endfor %}
-
-	{% endif %}
+		</div>
+	{% endfor %}
 {% endif %}

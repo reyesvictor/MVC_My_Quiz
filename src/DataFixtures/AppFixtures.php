@@ -10,6 +10,7 @@ use App\Entity\Category;
 use App\Entity\Question;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType as DateTimeType;
@@ -99,10 +100,10 @@ class AppFixtures extends Fixture
             if ($i == 0 || $i == 1 || $i == 2) {
                 if ( $i == 0 ) {
                     $user->setIsAdmin(1);
+                    $this->registerQuizzes($user, $manager);
                 } 
                 $user->setEmailIsVerified(1);
                 $user->setEmailVerifiedAt(new \DateTime('now'));
-                $this->registerQuizzes($user, $manager);
             }
 
             if (preg_match('/\ /', $users_arr[$i])) {
@@ -115,15 +116,9 @@ class AppFixtures extends Fixture
                 ->setPassword($pwd_hashed);
             $manager->persist($user);
         }
-
-        // Next:
-        // - Customize your new authenticator.
-        // - Finish the redirect "TODO" in the App\Security\LoginFormAuthenticator::onAuthenticationSuccess() method.
-        // - Review & adapt the login template: templates/security/login.html.twig.
-
+        $manager->flush();
 
         // Dans la partie d’échec Harry Potter prend la place de :;Un fou;Une tour;Un pion
-
         // Quel est le mot de passe du bureau de Dumbledore ?;Sorbet Citron;Chocogrenouille;Dragées Surprise
         // Quel chiffre est écrit à l'avant du Poudlard Express ?;5972;4732;6849
         // Avec qui Harry est-il interdit de jouer à vie au Quidditch par Ombrage ?;George Weasley;Fred Weasley;Drago Malefoy
@@ -134,11 +129,27 @@ class AppFixtures extends Fixture
         // Lequel de ces Mangemorts n'était pas présent lors de l'invasion au ministère ?;Rowle;Crabbe;Goyle
         // En quelle année sont morts les parents de Harry Potter ?;1981;1982;1983
 
-        // Quel est le mot de passe du bureau de Dumbledore ?;Sorbet Citron;Chocogrenouille;Dragées Surprise
 
-        // $quiz = new Quiz();
-        // $quiz->
-        $manager->flush();
+
+        //erase old cache
+        $cache = new FilesystemAdapter();
+
+        for ($i = 0; $i < 1000; $i++) {
+
+            //$i = id of quiz
+            $productsCount = $cache->getItem('quiz.game.' . $i);
+            if ($productsCount->isHit()) {
+                $cache->deleteItem('quiz.game.' . $i);
+            }
+
+            //$i = id of user
+            $vKey = $cache->getItem('key.verification.' . $i);
+            if ($vKey->isHit()) {
+                $cache->deleteItem('key.verification.' . $i);
+            }
+
+        }
+
     }
 
     private function registerQuizzes(User $user, ObjectManager $manager)
