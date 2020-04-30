@@ -74,6 +74,14 @@ class QuizController extends AbstractController
         }
         $quiz->setName("Akira");
         $quiz->setData("Tetsuo, un adolescent...");
+        
+
+        if($this->getUser() !== null) {
+            $user = $this->getUser();
+        } else {
+            $user = $this->getDoctrine()->getRepository(User::class)->getByName('Anonymous')[0];
+        }
+        $quiz->setAuthor($user);
 
         // $question->setQuizId($quiz);
         $form = $this->createForm(QuizType::class, $quiz, [
@@ -396,6 +404,10 @@ class QuizController extends AbstractController
         //else $user = $anonym
         $user =  $this->getDoctrine()->getRepository(User::class)->findByName('Anonymous')[0];
 
+        if ($this->getUser() !== null) {
+            $user = $this->getUser();
+        }
+
         //Storing to historic database
         $h = new Historic();
         $h->setUserId($user);
@@ -416,6 +428,12 @@ class QuizController extends AbstractController
         $ch = new FilesystemAdapter();
         $ch->save($cache);
     }
+
+
+
+
+    //VOIR LA LISTE TRELLO POUR CONTINUER DEMAIN !!!
+
 
     private function getScore($questions, $answers_from_user)
     {

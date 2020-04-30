@@ -6,7 +6,7 @@
 {% block body %}
 	<div class="card mb-2">
 		<div class="card-body">
-			<h1 class="card-title">User</h1>
+			<h1 class="card-title">{{user.name}}</h1>
 
 			<table class="table">
 				<tbody>
@@ -15,28 +15,20 @@
 						<td>{{ user.id }}</td>
 					</tr>
 					<tr>
-						<th>Name</th>
-						<td>{{ user.name }}</td>
-					</tr>
-					<tr>
-						<th>Slug</th>
-						<td>{{ user.slug }}</td>
-					</tr>
-					<tr>
 						<th>Email</th>
 						<td>{{ user.email }}</td>
 					</tr>
 					<tr>
-						<th>Email_verified_at</th>
-						<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : '' }}</td>
+						<th>Email is verified</th>
+						<td>{{ user.emailIsVerified ? 'Yes' : 'No' }}</td>
+					</tr>
+					<tr>
+						<th>Date of verification</th>
+						<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : 'None' }}</td>
 					</tr>
 					<tr>
 						<th>Is_admin</th>
 						<td>{{ user.isAdmin ? 'Yes' : 'No' }}</td>
-					</tr>
-					<tr>
-						<th>Password</th>
-						<td>{{ user.password }}</td>
 					</tr>
 					<tr>
 						<th>Remember_token</th>

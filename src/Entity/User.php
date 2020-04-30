@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
@@ -85,7 +86,7 @@ class User implements UserInterface
     private $updated_at;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $last_connected_at;
 
@@ -129,6 +130,21 @@ class User implements UserInterface
     {
         $this->updated_at = new \DateTime('now');
         return $this;
+    }
+
+    /**
+     * 
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     * 
+     * @return void
+     */
+    public function setAdminDefaultToFalse()
+    {
+        if ( $this->is_admin == null ) {
+            $this->is_admin = 0;
+            return $this;
+        }
     }
 
     public function __construct()
@@ -263,17 +279,9 @@ class User implements UserInterface
         return $this->last_connected_at;
     }
 
-
-    /**
-     * @ORM\PrePersist
-     * 
-     * @return void
-     */
     public function setLastConnectedAt()
     {
-        if (empty($this->last_connected_at)) {
-            $this->last_connected_at = new \DateTime();
-        }
+        $this->last_connected_at = new \DateTime('now');
     }
 
     /**

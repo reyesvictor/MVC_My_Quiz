@@ -2,7 +2,9 @@
 
 namespace App\Security;
 
+use DateTime;
 use App\Entity\User;
+use App\Controller\UserController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
@@ -103,9 +105,19 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         // }
         // // For example : return new RedirectResponse($this->urlGenerator->generate('some_route'));
         // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
-        $session = new Session();
-        $session->getFlashbag()->add('success', 'You are logged in. Yeah !');
-        return new RedirectResponse($this->urlGenerator->generate('homepage'));
+
+
+        //Update last_connected_at
+        if( ($user = $token->getUser()) !== null && $token->getUser()->getId() !== null ) {
+            return new RedirectResponse($this->urlGenerator->generate('user_updateLastConnectedAt'));
+        }
+        // dd($request->request, $token, $providerKey, $user->getLastConnectedAt());
+        
+        //Increase value of unique visitors???
+        
+        // $session = new Session();
+        // $session->getFlashbag()->add('success', 'You are logged in. Yeah !');
+        // return new RedirectResponse($this->urlGenerator->generate('homepage'));
     }
 
     protected function getLoginUrl()

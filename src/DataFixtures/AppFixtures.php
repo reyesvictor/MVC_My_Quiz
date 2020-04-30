@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use DateTime;
 use App\Entity\Quiz;
 use App\Entity\User;
 use App\Entity\Answer;
@@ -9,9 +10,9 @@ use App\Entity\Category;
 use App\Entity\Question;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType as DateTimeType;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType as DateTimeType;
 
 class AppFixtures extends Fixture
 {
@@ -89,22 +90,25 @@ class AppFixtures extends Fixture
             'Jean-Marc Ayrault',
             'Benoit Hamon',
             'Christine Boutin',
+            'Catherine deMedicis',
         ];
 
         for ($i = 0; $i < count($users_arr); $i++) {
             $user = new User();
             $pwd_hashed = $this->encoder->encodePassword($user, 'root');
-            if ($i == 0) {
-                $user->setIsAdmin(1);
+            if ($i == 0 || $i == 1 || $i == 2) {
+                if ( $i == 0 ) {
+                    $user->setIsAdmin(1);
+                } 
+                $user->setEmailIsVerified(1);
+                $user->setEmailVerifiedAt(new \DateTime('now'));
                 $this->registerQuizzes($user, $manager);
-            } else {
-                $user->setIsAdmin(0);
             }
 
             if (preg_match('/\ /', $users_arr[$i])) {
-                $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])));
+                $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])) . '.fr');
             } else {
-                $user->setEmail($users_arr[$i] . '@' . preg_replace('/\_/', '', $users_arr[$i]));
+                $user->setEmail($users_arr[$i] . '@' . preg_replace('/\_/', '', $users_arr[$i]) . '.fr');
             }
 
             $user->setName($users_arr[$i])

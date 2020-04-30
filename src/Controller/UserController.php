@@ -6,10 +6,12 @@ use DateTime;
 use App\Entity\Quiz;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Form\AdminType;
 use App\Entity\UpdatePassword;
 use App\Form\UpdatePasswordType;
 use App\Repository\UserRepository;
 use Symfony\Component\Form\FormError;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +25,8 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  */
 class UserController extends AbstractController
 {
+
+    private $users_modify_email_only = ['admin', 'deleteduser', 'anonymous'];
 
     // Le login se trouve dans SecurityController 
     // Le register se trouve dans HomeController     
@@ -76,15 +80,22 @@ class UserController extends AbstractController
      */
     public function edit(Request $request, User $user, UserPasswordEncoderInterface $encoder): Response
     {
-        $form = $this->createForm(UserType::class, $user);
+        if (in_array(strtolower($user->getName()), $this->users_modify_email_only)) {
+            $this->addFlash('danger', 'This user email can only be modified.');
+            $page = 'edit_admin';
+            $form = $this->createForm(AdminType::class, $user);
+        } else {
+            $page = 'edit';
+            $form = $this->createForm(UserType::class, $user);
+        }
+
         $form->handleRequest($request);
         // dd($request->request,$form->isSubmitted(), $form->isValid());
         if ($form->isSubmitted() && $form->isValid()) {
-            $password_hashed = $encoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password_hashed);
+            // $password_hashed = $encoder->encodePassword($user, $user->getPassword());
+            // $user->setPassword($password_hashed);
             $this->getDoctrine()->getManager()->flush();
 
-            //also verify if is admin
             if (isset($request->request->get('user')['email_is_verified'])) {
                 $em = $this->getDoctrine()->getManager();
                 $user->setEmailVerifiedAt(new \DateTime('now'));
@@ -96,11 +107,11 @@ class UserController extends AbstractController
                 $em->persist($user);
                 $em->flush();
             }
-
+            $this->addFlash('success', 'User information has been updated.');
             return $this->redirectToRoute('user_index');
         }
 
-        return $this->render('user/edit.html.twig', [
+        return $this->render("user/$page.html.twig", [
             'user' => $user,
             'form' => $form->createView(),
         ]);
@@ -113,10 +124,10 @@ class UserController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $deletedUser = $this->getDoctrine()->getRepository(User::class)->findByName('deletedUser')[0];
-            if (($id = $user->getId()) == $deletedUser->getId()) {
-                $this->addFlash('danger', "This user can't be deleted, or it will break the website.");
+            if (in_array(strtolower($user->getName()), $this->users_modify_email_only)) {
+                $this->addFlash('danger', "This user can't be deleted, or it will break the website database structure.");
                 return $this->redirectToRoute('user_show', [
-                    'id' => $id,
+                    'id' => $user->getId(),
                 ]);
             }
 
@@ -153,7 +164,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // dd($pwdUpdt, $user->getPassword(), password_verify($pwdUpdt->getOldPassword(), $user->getPassword()));
-            if(!password_verify($pwdUpdt->getOldPassword(), $user->getPassword())) {
+            if (!password_verify($pwdUpdt->getOldPassword(), $user->getPassword())) {
                 $form->get('oldPassword')->addError(new FormError('Your password is not valid.'));
             } else {
                 $new = $pwdUpdt->getNewPassword();
@@ -169,5 +180,28 @@ class UserController extends AbstractController
             'form' => $form->createView(),
         ]);
         return $this->redirectToRoute('user_index');
+    }
+
+
+    /**
+     * Activated on login by LoginFormAuthenticator method onAuthenticationSuccess()
+     * @Route("updateLastConnectedAt", name="user_updateLastConnectedAt", methods={"GET", "POST"})
+     *
+     */
+    public function updateLastVisitedAt(Request $request): Response
+    {
+        if (array_reverse(explode('/', $request->headers->get('referer')))[0] == 'login') {
+            if ($this->getUser() !== null) {
+                $user = $this->getUser();
+                $user->setLastConnectedAt();
+                $manager = $this->getDoctrine()->getManager();
+                $manager->persist($user);
+                $manager->flush();
+            }
+            $this->addFlash('success', 'You are logged in. Yeah !');
+        } else {
+            $this->addFlash('danger', "You can't access this feature on your own.");
+        }
+        return $this->redirectToRoute('homepage');
     }
 }

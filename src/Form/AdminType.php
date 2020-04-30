@@ -10,22 +10,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class UserType extends AbstractType
+class AdminType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name')
-            ->add('email')
-            ->add('email_is_verified', CheckboxType::class, [
-                'required' => false,
-                'value' => true,
-            ])
-            ->add('is_admin', CheckboxType::class, [
-                'required' => false,
-                'value' => true,
-            ])
-            ;
+            ->add('email');
     }
 
     public function configureOptions(OptionsResolver $resolver)

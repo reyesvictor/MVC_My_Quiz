@@ -44,6 +44,7 @@ class HomeController extends AbstractController
         // var_dump($product);
         // echo '<br>--------</br></pre>';
         // exit();
+
         return $this->render('home/index.html.twig', [
             'controller_name' => 'HomeController',
         ]);
