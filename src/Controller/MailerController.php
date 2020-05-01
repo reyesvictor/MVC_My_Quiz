@@ -3,12 +3,14 @@
 // src/Controller/MailerController.php
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 // // src/Controller/MailerController.php
@@ -24,10 +26,34 @@ class MailerController extends AbstractController
   /**
    * @Route("/email")
    * @param MailerInterface $mailer
-   * @return Response
+  //  * @return Response
    */
-  public function sendEmail(MailerInterface $mailer)
+  public static function sendEmail(MailerInterface $mailer, User $user)
   {
+    //generate authentification key and store it in cache
+    $id = $user->getId();
+    $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
+    $cache = new FilesystemAdapter();
+    $productsCount = $cache->getItem('key.verification.' . $id);
+    $productsCount->set($vkey);
+    $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
+
+    //send email to confirm user email
+    $email = (new TemplatedEmail())
+      ->from('admin@admin.fr')
+      ->to(new Address($user->getEmail()))
+      ->subject('Thanks for signing up!')
+      ->htmlTemplate('mail/confirm_email.html.twig')
+      ->context([
+        'expiration_date' => new \DateTime('+7 days'),
+        'username' => $user->getName(),
+        'id' => $id,
+        'vkey' => $vkey,
+      ]);
+    $mailer->send($email);
+    return true;
+
+
 
     $email = (new TemplatedEmail())
       ->from('hello@example.com')

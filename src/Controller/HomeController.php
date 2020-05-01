@@ -73,34 +73,12 @@ class HomeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // dd($user);
             $password_hashed = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password_hashed);
             $manager->persist($user);
             $manager->flush();
             $this->addFlash('success', "You are registered. Please login.");
-
-            //generate authentification key and store it in cache
-            $id = $user->getId();
-            $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
-            $cache = new FilesystemAdapter();
-            $productsCount = $cache->getItem('key.verification.' . $id);
-            $productsCount->set($vkey);
-            $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
-
-            //send email to confirm user email
-            $email = (new TemplatedEmail())
-                ->from('admin@admin.fr')
-                ->to(new Address($user->getEmail()))
-                ->subject('Thanks for signing up!')
-                ->htmlTemplate('mail/confirm_email.html.twig')
-                ->context([
-                    'expiration_date' => new \DateTime('+7 days'),
-                    'username' => $user->getName(),
-                    'id' => $id,
-                    'vkey' => $vkey,
-                ]);
-            $mailer->send($email);
+            MailerController::sendEmail($mailer, $user);
             $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
             return $this->redirectToRoute('app_login');
         }
@@ -111,6 +89,32 @@ class HomeController extends AbstractController
         ]);
     }
 
+    public static function sendEmail(User $user, $mailer)
+    {
+        //generate authentification key and store it in cache
+        $id = $user->getId();
+        $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
+        $cache = new FilesystemAdapter();
+        $productsCount = $cache->getItem('key.verification.' . $id);
+        $productsCount->set($vkey);
+        $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
+
+        //send email to confirm user email
+        $email = (new TemplatedEmail())
+            ->from('admin@admin.fr')
+            ->to(new Address($user->getEmail()))
+            ->subject('Thanks for signing up!')
+            ->htmlTemplate('mail/confirm_email.html.twig')
+            ->context([
+                'expiration_date' => new \DateTime('+7 days'),
+                'username' => $user->getName(),
+                'id' => $id,
+                'vkey' => $vkey,
+            ]);
+        $mailer->send($email);
+        $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
+    }
+
     /**
      * Delete All Quizes From Cache. Importing and loading fixtures can cause errors with the cache system
      * 
@@ -119,10 +123,12 @@ class HomeController extends AbstractController
     public function deleteQuizCache()
     {
         $cache = new FilesystemAdapter();
-        for ($i = 0; $i < 1000; $i++) {
-            $productsCount = $cache->getItem('quiz.game.' . $i);
-            if ($productsCount->isHit()) {
-                $cache->deleteItem('quiz.game.' . $i);
+        for ($quiz = 0; $quiz < 1000; $quiz++) {
+            for ($user = 0; $user < 1000; $user++) {
+                $productsCount = $cache->getItem('quiz.game.' . $quiz . '.' . $user);
+                if ($productsCount->isHit()) {
+                    $cache->deleteItem('quiz.game.' . $quiz . '.' . $user);
+                }
             }
         }
         $this->addFlash('info', 'All quiz cache was deleted');

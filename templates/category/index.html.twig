@@ -29,7 +29,9 @@
 							<td>{{ category.updatedAt ? category.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
 							<td>
 								<a class='btn btn-secondary' href="{{ path('category_show', {'id': category.id}) }}">Show</a>
-								<a class='btn btn-secondary' href="{{ path('category_edit', {'id': category.id}) }}">Edit</a>
+								{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+									<a class='btn btn-secondary' href="{{ path('category_edit', {'id': category.id}) }}">Edit</a>
+								{% endif %}
 							</td>
 						</tr>
 					{% else %}
@@ -39,8 +41,9 @@
 					{% endfor %}
 				</tbody>
 			</table>
-
-			<a class='btn btn-primary' href="{{ path('category_new') }}">Create New Category</a>
+			{% if app.user is defined and app.user is not null %}
+				<a class='btn btn-primary' href="{{ path('category_new') }}">Create New Category</a>
+			{% endif %}
 		</div>
 	</div>
 {% endblock %}

@@ -107,7 +107,6 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         // // For example : return new RedirectResponse($this->urlGenerator->generate('some_route'));
         // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
 
-
         //verify if account confirmed
         $id = $token->getUser()->getId();
         $cache = new FilesystemAdapter();
@@ -117,7 +116,6 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
             $session->getFlashbag()->add('warning', 'Check your mails. You need to verify your email to log in.');
             return new RedirectResponse($this->urlGenerator->generate('app_logout'));
         }
-
 
         //Update last_connected_at
         if (($user = $token->getUser()) !== null && $id !== null) {

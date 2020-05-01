@@ -14,48 +14,53 @@
 						<th>Id</th>
 						<td>{{ user.id }}</td>
 					</tr>
-					<tr>
-						<th>Email</th>
-						<td>{{ user.email }}</td>
-					</tr>
-					<tr>
-						<th>Email is verified</th>
-						<td>{{ user.emailIsVerified ? 'Yes' : 'No' }}</td>
-					</tr>
-					<tr>
-						<th>Date of verification</th>
-						<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : 'None' }}</td>
-					</tr>
-					<tr>
-						<th>Is_admin</th>
-						<td>{{ user.isAdmin ? 'Yes' : 'No' }}</td>
-					</tr>
-					<tr>
-						<th>Remember_token</th>
-						<td>{{ user.rememberToken }}</td>
-					</tr>
+					{% if app.user is defined and app.user is not null and ('ROLE_ADMIN' in app.user.getRoles or app.user is same as(user)) %}
+						<tr>
+							<th>Email</th>
+							<td>{{ user.email }}</td>
+						</tr>
+					{% endif %}
+					{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+						<tr>
+							<th>Email is verified</th>
+							<td>{{ user.emailIsVerified ? 'Yes' : 'No' }}</td>
+						</tr>
+						<tr>
+							<th>Date of verification</th>
+							<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : 'None' }}</td>
+						</tr>
+						<tr>
+							<th>Is_admin</th>
+							<td>{{ user.isAdmin ? 'Yes' : 'No' }}</td>
+						</tr>
+						<tr>
+							<th>Remember_token</th>
+							<td>{{ user.rememberToken }}</td>
+						</tr>
+					{% endif %}
 					<tr>
 						<th>Created_at</th>
 						<td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : '' }}</td>
 					</tr>
-					<tr>
-						<th>Updated_at</th>
-						<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-					</tr>
-					<tr>
-						<th>Last_connected_at</th>
-						<td>{{ user.lastConnectedAt ? user.lastConnectedAt|date('Y-m-d H:i:s') : '' }}</td>
-					</tr>
+					{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+						<tr>
+							<th>Updated_at</th>
+							<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+						</tr>
+						<tr>
+							<th>Last_connected_at</th>
+							<td>{{ user.lastConnectedAt ? user.lastConnectedAt|date('Y-m-d H:i:s') : '' }}</td>
+						</tr>
+					{% endif %}
 				</tbody>
 			</table>
 
 			<a class="btn btn-secondary" href="{{ path('user_index') }}">Back To Users List</a>
-
-			<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
-
-			<a class="btn btn-primary" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
-
-			{{ include('user/_delete_form.html.twig') }}
+			{% if app.user is defined and app.user is not null and ('ROLE_ADMIN' in app.user.getRoles or app.user is same as(user) ) %}
+				<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
+				<a class="btn btn-primary" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
+				{{ include('user/_delete_form.html.twig') }}
+			{% endif %}
 
 		</div>
 	</div>

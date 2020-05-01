@@ -13,13 +13,15 @@
 					<tr>
 						<th>Id</th>
 						<th>Name</th>
-						<th>Email</th>
-						<th>Email_verified_at</th>
-						<th>Is_admin</th>
-						<th>Remember_token</th>
-						<th>Created_at</th>
-						<th>Updated_at</th>
-						<th>Last_connected_at</th>
+						{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+							<th>Email</th>
+							<th>Email_verified_at</th>
+							<th>Is_admin</th>
+							<th>Remember_token</th>
+							<th>Created_at</th>
+							<th>Updated_at</th>
+							<th>Last_connected_at</th>
+						{% endif %}
 						<th>actions</th>
 					</tr>
 				</thead>
@@ -28,17 +30,21 @@
 						<tr>
 							<td>{{ user.id }}</td>
 							<td>{{ user.name }}</td>
-							<td>{{ user.email }}</td>
-							<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : 'None' }}</td>
-							<td>{{ user.isAdmin ? 'Yes' : 'No' }}</td>
-							<td>{{ user.rememberToken }}</td>
-							<td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'None' }}</td>
-							<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : 'None' }}</td>
-							<td>{{ user.lastConnectedAt ? user.lastConnectedAt|date('Y-m-d H:i:s') : 'None' }}</td>
+							{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+								<td>{{ user.email }}</td>
+								<td>{{ user.emailVerifiedAt ? user.emailVerifiedAt|date('Y-m-d H:i:s') : 'None' }}</td>
+								<td>{{ user.isAdmin ? 'Yes' : 'No' }}</td>
+								<td>{{ user.rememberToken }}</td>
+								<td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'None' }}</td>
+								<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : 'None' }}</td>
+								<td>{{ user.lastConnectedAt ? user.lastConnectedAt|date('Y-m-d H:i:s') : 'None' }}</td>
+							{% endif %}
 							<td>
 								<a class="btn btn-info" href="{{ path('user_show', {'id': user.id}) }}">Show</a>
-								<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
-								<a class="btn btn-warning" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
+								{% if app.user is defined and app.user is not null and ('ROLE_ADMIN' in app.user.getRoles or app.user is same as(user) ) %}
+									<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
+									<a class="btn btn-warning" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
+								{% endif %}
 							</td>
 						</tr>
 					{% else %}
@@ -48,8 +54,9 @@
 					{% endfor %}
 				</tbody>
 			</table>
-
-			<a class="btn btn-primary" href="{{ path('user_new') }}">Create new</a>
+			{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+				<a class="btn btn-primary" href="{{ path('user_new') }}">Create new</a>
+			{% endif %}
 		</div>
 	</div>
 {% endblock %}

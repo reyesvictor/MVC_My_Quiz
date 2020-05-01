@@ -91,7 +91,7 @@ class User implements UserInterface
     private $last_connected_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="user_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="user", cascade={"remove"})
      */
     private $historics;
 
@@ -364,7 +364,13 @@ class User implements UserInterface
         $roles = $this->UserRoles->map(function($role) {
             return $role->getTitle();
         })->toArray();
+
+        // if ( $this->is_admin ) {
+        //     $roles[] = 'ROLE_ADMIN';
+        // }
+        
         $roles[] = 'ROLE_USER'; //add this so it is by default
+        // dd($roles);
         return $roles;
     }
 

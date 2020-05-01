@@ -11,6 +11,8 @@
 		{{ form_widget(form._token) }}
 	</div>
 </div>
+
+								{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
 <div class="card text-white bg-warning mb-3">
 	<div class="card-header">User Information - For Admins Only</div>
 	<div class="card-body">
@@ -20,6 +22,8 @@
 		{{ form_widget(form.is_admin, {'attr': {'value': user.isAdmin}  })  }}
 	</div>
 </div>
+{% endif %}
+
 <button class="btn btn-primary">{{ button_label|default('Save') }}</button>
 {{ form_errors(form) }}
 {{ form_end(form, {'render_rest': false}) }}

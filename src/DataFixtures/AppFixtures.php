@@ -109,10 +109,9 @@ class AppFixtures extends Fixture
                         ->addUserRoles($adminRole);
                     $this->registerQuizzes($user, $manager);
                 }
-                $user->setEmailIsVerified(1);
-                $user->setEmailVerifiedAt(new \DateTime('now'));
             }
-
+            $user->setEmailIsVerified(1);
+            $user->setEmailVerifiedAt(new \DateTime('now'));
             if (preg_match('/\ /', $users_arr[$i])) {
                 $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])) . '.fr');
             } else {
@@ -140,13 +139,14 @@ class AppFixtures extends Fixture
 
         //erase old cache
         $cache = new FilesystemAdapter();
-
         for ($i = 0; $i < 1000; $i++) {
-
-            //$i = id of quiz
-            $productsCount = $cache->getItem('quiz.game.' . $i);
-            if ($productsCount->isHit()) {
-                $cache->deleteItem('quiz.game.' . $i);
+            //delete all quiz of all users
+            for ($user = 0; $user < 1000; $user++) {
+                //$i = id of quiz
+                $productsCount = $cache->getItem('quiz.game.' . $i . '.' . $user);
+                if ($productsCount->isHit()) {
+                    $cache->deleteItem('quiz.game.' . $i . '.' . $user);
+                }
             }
 
             //$i = id of user
