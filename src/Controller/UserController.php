@@ -31,9 +31,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  */
 class UserController extends AbstractController
 {
-
     private $users_modify_email_only = ['admin', 'deleteduser', 'anonymous'];
-
     // Le login se trouve dans SecurityController 
     // Le register se trouve dans HomeController     
 

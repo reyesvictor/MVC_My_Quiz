@@ -342,8 +342,22 @@ class QuizController extends AbstractController
                 // dd($request->request->all());
                 $this->addFlash('danger', 'You must not submit more than one answer.');
             } else {
-                // dd();
-                // dd($cache_questions);
+                $correct = 0;
+                for ($i = 0; $i < 3; $i++) {
+                    $correct_answer = $questions[$qst_key]->getAnswers()[$i];
+                    if ($correct_answer->getIsCorrect()) {
+                        if (
+                            preg_replace('/\ |\_/', '', strtolower($correct_answer->getName())) ==
+                            preg_replace('/\ |\_/', '', strtolower(array_key_first($request->request->all())))
+                        ) {
+                            $this->addFlash("success", $correct_answer->getName() . " was the correct answer !");
+                            $correct++;
+                        }
+                    }
+                }
+                if ($correct == 0) {
+                    $this->addFlash("danger", "Wrong answer ! The corret answer was " . $correct_answer->getName());
+                }
                 $cache_questions = $productsCount->get()['data'];
                 // dd($productsCount);
                 $cache_questions[$qst_key] = array_key_first($request->request->all());
