@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Historic
+{% endblock %}
+
+{% block body %}
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Historic Page of
+				{% if historics|length > 0 %}
+					{{ name }}</h1>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Quiz Name</th>
+							<th>Score</th>
+							<th>Played By</th>
+							<th>Played At</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for historic in historics %}
+							<tr>
+								<td>{{historic.quizId.name}}</td>
+								<td>{{ historic.score }}</td>
+								<td>{{ historic.userId.name }}</td>
+								<td>{{ historic.createdAt ? historic.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+							</tr>
+						{% else %}
+							<tr>
+								<td colspan="7">no records found</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{% else %}
+		<p>No historic found</p>
+	{% endif %}
+
+{% endblock %}

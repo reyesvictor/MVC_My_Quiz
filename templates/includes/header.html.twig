@@ -14,43 +14,42 @@
 				<a class="nav-link" href="{{ path("category_index") }}">Categories</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="{{ path("quiz_index") }}">Quiz<a>
-				</li>
-			<li class="nav-item">
-				<a class="nav-link" href="{{ path("user_index") }}">Users<a>
-				</li>
-					{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
-						<li class="nav-item">
-							<a class="nav-link" href="#">Admin Pannel</a>
-						</li>
-					{% endif %}
-				</ul>
-				{% if app.user is defined and app.user is not null %}
-						<ul class="navbar-nav ml-auto">
-							<li class="nav-item float-right">
-								<a class="nav-link" href="{{path('user_show', {'id': app.user.id})}}">
-									{{app.user.username}}</a>
+				<a class="nav-link" href="{{ path("quiz_index") }}">Quiz<a></li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{ path("user_index") }}">Users<a></li>
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path("quiz_myhistoric") }}">My Historic</a>
 							</li>
-							<li class="nav-item  mr-sm-2">
-								<a class="nav-link" href="{{ path('app_logout') }}">Logout</a>
-							</li>
-						{% else %}
-							<ul class="navbar-nav ml-auto">
+							{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
 								<li class="nav-item">
-									<a class="nav-link" href="{{path("app_login")}}">Login</a>
+									<a class="nav-link" href="{{path("admin_index")}}">Admin Pannel</a>
 								</li>
+							{% endif %}
+						</ul>
+						{% if app.user is defined and app.user is not null %}
+							<ul class="navbar-nav ml-auto">
+								<li class="nav-item float-right">
+									<a class="nav-link" href="{{path('user_show', {'id': app.user.id})}}">
+										{{app.user.username}}</a>
+								</li>
+								<li class="nav-item  mr-sm-2">
+									<a class="nav-link" href="{{ path('app_logout') }}">Logout</a>
+								</li>
+							{% else %}
 								<ul class="navbar-nav ml-auto">
 									<li class="nav-item">
-										<a class="nav-link" href="{{path("app_register")}}">Register</a>
+										<a class="nav-link" href="{{path("app_login")}}">Login</a>
 									</li>
-								{% endif %}
-						</ul>
-						{# <form class="form-inline my-2 my-lg-0">
-																															<input class="form-control mr-sm-2" type="text" placeholder="Search">
-																															<button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-																														</form> #}
+									<ul class="navbar-nav ml-auto">
+										<li class="nav-item">
+											<a class="nav-link" href="{{path("app_register")}}">Register</a>
+										</li>
+									{% endif %}
+								</ul>
+
+							</li>
+						</li>
 					</li>
-				</li>
+				</div>
 			</li>
-		</div>
-	</nav>
+		</nav>

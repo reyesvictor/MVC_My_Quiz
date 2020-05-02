@@ -135,8 +135,6 @@ class AppFixtures extends Fixture
         // Lequel de ces Mangemorts n'était pas présent lors de l'invasion au ministère ?;Rowle;Crabbe;Goyle
         // En quelle année sont morts les parents de Harry Potter ?;1981;1982;1983
 
-
-
         //erase old cache
         $cache = new FilesystemAdapter();
         for ($i = 0; $i < 1000; $i++) {
@@ -154,6 +152,12 @@ class AppFixtures extends Fixture
             if ($vKey->isHit()) {
                 $cache->deleteItem('key.verification.' . $i);
             }
+            
+        }
+        //delete visitors count
+        $visitors = $cache->getItem('visitors');
+        if ($visitors->isHit()) {
+            $cache->deleteItem('visitors');
         }
     }
 

@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminController!
+{% endblock %}
+
+{% block body %}
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Send Email</h1>
+
+			<form method="post" action="{{ path('send_email') }}">
+				<label for="pet-select">Choose a filter:</label>
+				<select name="pets" id="pet-select">
+					<option value="">--Please choose an option--</option>
+					<option value="dog">Dog</option>
+					<option value="cat">Cat</option>
+					<option value="hamster">Hamster</option>
+					<option value="parrot">Parrot</option>
+					<option value="spider">Spider</option>
+					<option value="goldfish">Goldfish</option>
+				</select>
+				<button class="btn btn-danger mt-2">Send</button>
+			</form>
+
+		</div>
+	</div>
+	{% if app.user is defined and app.user is not null %}{% endif %}
+{% endblock %}

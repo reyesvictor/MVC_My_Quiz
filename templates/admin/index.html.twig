@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminController!
+{% endblock %}
+
+{% block body %}
+	<div class="card mb-2">
+		<div class="card-body">
+			<h1 class="card-title">Admin Page</h1>
+			<div class="row">
+
+				<div class="card bg-light mb-3 mr-3" style="max-width: 20rem;">
+					<div class="card-header">Number of visitors</div>
+					<div class="card-body">
+						<h4 class="card-title">{{ number_of_visitors }}</h4>
+						<p class="card-text">visitors came to the website.</p>
+					</div>
+				</div>
+
+				<div class="card bg-light mb-3 mr-3" style="max-width: 20rem;">
+					<div class="card-header">Delete Cache</div>
+					<div class="card-body">
+						<ul>
+							<li class='mb-1'>Quiz Games
+								<code>
+									<a class="btn btn-secondary" href="{{ path('app_cache_delete') }}">Delete</a>
+								</code>
+							</li>
+							<li>Verification Key
+								<code>
+									<a class="btn btn-secondary" href="{{ path('app_cache_delete_key') }}">Delete</a>
+								</code>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="card bg-light mb-3 mr-3" style="max-width: 30rem;">
+					<div class="card-header">Send Email</div>
+					<div class="card-body">
+						<form method="post" action="{{ path('send_email') }}">
+							<label for="pet-select">Choose a filter:</label>
+								<select name="filter">
+									<option value="">--Users--</option>
+									<option value="cat">• Qui ont passé un ou plusieurs quiz en particulier.</option>
+									<option value="hamster">• Qui n’ont pas passé un ou plusieurs quiz en particulier.</option>
+									<option value="parrot">• Qui se sont connecté au moins une fois depuis 1 mois.</option>
+									<option value="spider">• Qui ne se sont pas connecté au moins une fois depuis 1 mois.</option>
+								</select>
+							<button class="btn btn-info mt-2">Send</button>
+						</form>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	{% if app.user is defined and app.user is not null %}{% endif %}
+{% endblock %}

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Quiz;
 use App\Entity\Category;
 use App\Form\CategoryType;
+use App\Controller\HomeController;
 use App\Repository\CategoryRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,8 +22,11 @@ class CategoryController extends AbstractController
     /**
      * @Route("/", name="category_index", methods={"GET"})
      */
-    public function index(CategoryRepository $categoryRepository): Response
+    public function index(CategoryRepository $categoryRepository, Request $request): Response
     {
+        HomeController::countVisitors($request, $this->getUser());
+
+
         return $this->render('category/index.html.twig', [
             'categories' => $categoryRepository->findAll(),
         ]);

@@ -7,6 +7,8 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Category;
 use App\Form\UserRegisterType;
+use App\Controller\HomeController;
+use App\Controller\UserController;
 use Symfony\Component\Mime\Address;
 use App\Repository\CategoryRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,11 +24,13 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class HomeController extends AbstractController
 {
 
     private $security;
+    private $getUser;
 
     public function __construct(Security $security)
     {
@@ -37,19 +41,9 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="homepage")
      */
-    public function home()
+    public function home(Request $request)
     {
-        // $repository = $this->getDoctrine()->getRepository(Category::class);
-        // $data = $repository->find(['id' => 14]);
-        // $return  = new Category();
-        // $repository = $this->getDoctrine()->getRepository(Category::class);
-
-        // $product = $repository->find(14);
-        // echo '--------<pre>';
-        // var_dump($product);
-        // echo '<br>--------</br></pre>';
-        // exit();
-
+        HomeController::countVisitors($request, $this->getUser());
         return $this->render('home/index.html.twig', [
             'controller_name' => 'HomeController',
         ]);
@@ -63,6 +57,8 @@ class HomeController extends AbstractController
      */
     public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder, MailerInterface $mailer): Response
     {
+        HomeController::countVisitors($request, $this->getUser());
+
         if ($this->security->getUser() !== null) {
             $this->addFlash('success', 'You are connected. Logout to register');
             return $this->redirectToRoute('homepage');
@@ -115,45 +111,6 @@ class HomeController extends AbstractController
         $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
     }
 
-    /**
-     * Delete All Quizes From Cache. Importing and loading fixtures can cause errors with the cache system
-     * 
-     * @Route("/delete_cache", name="app_cache_delete", methods={"GET","POST"})
-     */
-    public function deleteQuizCache()
-    {
-        $cache = new FilesystemAdapter();
-        for ($quiz = 0; $quiz < 1000; $quiz++) {
-            for ($user = 0; $user < 1000; $user++) {
-                $productsCount = $cache->getItem('quiz.game.' . $quiz . '.' . $user);
-                if ($productsCount->isHit()) {
-                    $cache->deleteItem('quiz.game.' . $quiz . '.' . $user);
-                }
-            }
-        }
-        $this->addFlash('info', 'All quiz cache was deleted');
-        return $this->redirectToRoute('homepage');
-    }
-
-
-    /**
-     * Delete All verification key from From Cache. It resets if fixture sur loaded
-     * 
-     * @Route("/delete_cache_key", name="app_cache_delete_key", methods={"GET","POST"})
-     */
-    public function deleteVKeyCache()
-    {
-        $cache = new FilesystemAdapter();
-        for ($i = 0; $i < 1000; $i++) {
-            $productsCount = $cache->getItem('key.verification.' . $i);
-            if ($productsCount->isHit()) {
-                $cache->deleteItem('key.verification.' . $i);
-            }
-        }
-        $this->addFlash('warning', 'All key verification cache was deleted');
-        return $this->redirectToRoute('homepage');
-    }
-
 
     /**
      * Verify User
@@ -181,4 +138,37 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
     }
+
+    public function countVisitors(Request $request, $user)
+    {
+        $cache = new FilesystemAdapter();
+        $name = 'visitors';
+        if (!$cache->getItem($name)->isHit()) { // create if it doesnt exist
+            $visitors = $cache->getItem($name);
+            $visitors->set([]);
+            $cache->save($visitors);
+        } else {
+            $visitors = $cache->getItem($name);
+            $arr = $visitors->get('value');
+            if (!$request->cookies->get('PHPSESSID')) {
+                if (array_key_exists('Anonym', $arr)) {
+                    $arr['Anonym'] = $arr['Anonym'] + 1;
+                } else {
+                    $arr['Anonym'] = 1;
+                }
+            } else {
+                if ($user == null) {
+                    $arr[$request->cookies->get('PHPSESSID')] = 'anonym';
+                } else {
+                    if (array_key_exists($request->cookies->get('PHPSESSID'), $arr)) {
+                        unset($arr[$request->cookies->get('PHPSESSID')]);
+                    }
+                    $arr[$user->getId()] = $request->cookies->get('PHPSESSID');
+                }
+            }
+            $visitors->set($arr);
+            $cache->save($visitors);
+        }
+    }
+
 }

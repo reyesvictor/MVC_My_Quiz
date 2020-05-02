@@ -13,6 +13,7 @@ use App\Entity\UpdatePassword;
 use App\Form\UserRegisterType;
 use App\Form\UpdatePasswordType;
 use App\Repository\UserRepository;
+use App\Controller\MailerController;
 use Symfony\Component\Form\FormError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,8 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,8 +41,9 @@ class UserController extends AbstractController
     /**
      * @Route("/", name="user_index", methods={"GET"})
      */
-    public function index(UserRepository $userRepository): Response
+    public function index(UserRepository $userRepository, Request $request): Response
     {
+        HomeController::countVisitors($request, $this->getUser());
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
@@ -96,8 +100,9 @@ class UserController extends AbstractController
      * @Route("/{id}/edit", name="user_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER') or is_granted('ROLE_ADMIN')", message="You can't delete this user information !")
      */
-    public function edit(Request $request, User $user, UserPasswordEncoderInterface $encoder): Response
+    public function edit(Request $request, User $user, UserPasswordEncoderInterface $encoder, MailerInterface $mailer): Response
     {
+        $old_email = $user->getEmail();
         if (!$this->userIsSameAsConnected($user)) {
             return $this->redirectToRoute('homepage');
         }
@@ -114,9 +119,12 @@ class UserController extends AbstractController
         $form->handleRequest($request);
         // dd($request->request,$form->isSubmitted(), $form->isValid());
         if ($form->isSubmitted() && $form->isValid()) {
-            // $password_hashed = $encoder->encodePassword($user, $user->getPassword());
             // $user->setPassword($password_hashed);
+            // $password_hashed = $encoder->encodePassword($user, $user->getPassword());
             // dd($user)->getIsAdmin();
+            $old_user_1 = $this->getDoctrine()->getRepository(User::class)->findById($user->getId())[0];
+            $new_email = $this->getUser()->getEmail();
+
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'User information has been updated.');
             $em = $this->getDoctrine()->getManager();
@@ -143,9 +151,17 @@ class UserController extends AbstractController
                     $this->removeAdminRole($user, $em);
                     if ($this->getUser() === $user) {
                         $this->addFlash('success', 'You need to log again to see the changes.');
-                        return $this->redirectToRoute('logout');
+                        return $this->redirectToRoute('app_logout');
                     }
                 }
+            }
+            if ($old_email != $new_email) { //si email differente envoyer mail confirmation
+                MailerController::sendEmail($mailer, $user);
+                $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
+                $user->setEmailIsVerified(0);
+                $em->persist($user);
+                $em->flush();
+                return $this->redirectToRoute('app_logout');
             }
             return $this->redirectToRoute('user_index');
         }
@@ -247,7 +263,6 @@ class UserController extends AbstractController
         // return $this->redirectToRoute('user_index');
     }
 
-
     /**
      * Activated on login by LoginFormAuthenticator method onAuthenticationSuccess()
      * 
@@ -273,7 +288,7 @@ class UserController extends AbstractController
 
     private function userIsSameAsConnected(User $user)
     {
-        if ( $user == $this->getUser() || in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ) {
+        if ($user == $this->getUser() || in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
             return true;
         }
         $this->addFlash("warning", "You can't access another user info. No hacking allowed here !");

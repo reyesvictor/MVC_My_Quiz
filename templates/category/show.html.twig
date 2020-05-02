@@ -45,10 +45,6 @@
 							<th>Quiz Name</th>
 							<td>{{ quiz.name }}</td>
 						</tr>
-						{# <tr>
-																	<th>Slug</th>
-																	<td>{{ quiz.slug }}</td>
-																</tr> #}
 						<tr>
 							<th>Created at</th>
 							<td>{{ quiz.createdAt ? quiz.createdAt|date('Y-m-d H:i:s') : '' }}</td>
@@ -57,13 +53,19 @@
 							<th>Updated at</th>
 							<td>{{ quiz.updatedAt ? quiz.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
 						</tr>
+						<tr>
+							<th>Play</th>
+							<td>
+								<a class="btn btn-info" href="/quiz/ {{ quiz.id }}/play">Play</td>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			{% endfor %}
 
 
 			<a class='btn btn-primary' href="{{ path('category_index') }}">Back To Category List</a>
-								{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+			{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
 
 				<a class='btn btn-secondary' href="{{ path('category_edit', {'id': category.id}) }}">Edit</a>
 

@@ -11,6 +11,8 @@ use App\Form\QuizType;
 use App\Entity\Category;
 use App\Entity\Historic;
 use App\Entity\Question;
+use App\Controller\HomeController;
+use App\Controller\UserController;
 use App\Repository\QuizRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -29,8 +31,9 @@ class QuizController extends AbstractController
     /**
      * @Route("/", name="quiz_index", methods={"GET"})
      */
-    public function index(QuizRepository $quizRepository): Response
+    public function index(QuizRepository $quizRepository, Request $request): Response
     {
+        HomeController::countVisitors($request, $this->getUser());
         $historics = $this->getDoctrine()->getRepository(Historic::class)->findAll();
         $historics = array_reverse($historics); //montrer le plus récent en premier
 
@@ -458,6 +461,35 @@ class QuizController extends AbstractController
         }
         $score_str = $score . '/' . count($answers_from_user);
         return $score_str;
+    }
+
+
+
+    /**
+     * Show Personnal Historic
+     * 
+     * @Route("/historic", name="quiz_myhistoric", methods={"GET","POST"})
+     */
+    public function myHistoric(): Response
+    {
+        if ($this->getUser() !== null) {
+            $user = $this->getUser()->getId();
+            $name = $this->getUser()->getName();
+        } else {
+            $user = $this->getDoctrine()->getRepository(User::class)->findByName('Anonymous')[0]->getId();
+            $name = $this->getDoctrine()->getRepository(User::class)->findByName('Anonymous')[0]->getName();
+        }
+        $historics = $this->getDoctrine()->getRepository(Historic::class)->findByUser($user);
+        $historics = array_reverse($historics); //montrer le plus récent en premier
+        // dd($this->getDoctrine()->getRepository(User::class)->findByName('Anonymous')[0]);
+        // $user = $this->getUser();
+        // if ($this->getUser() == null) {
+        //     $user = new User();
+        // }
+        return $this->render('quiz/my_historic.html.twig', [
+            'historics' => $historics,
+            'name' => $name
+        ]);
     }
 
     /**
