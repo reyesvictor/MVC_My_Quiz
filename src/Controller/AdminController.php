@@ -317,14 +317,8 @@ class AdminController extends AbstractController
             ]
         ];
 
-        // dd($email, $request->request->all(), preg_match('/\|/', $email),);
         if (preg_match('/\|/', $email)) {
             $list = explode('|', $email);
-            // foreach ($list as $mail) {
-            //     $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($mail)[0];
-            //     MailerController::sendEmail($mailer, $user, $options);
-            //     sleep(2);
-            // }
             $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($list[0])[0];
             $options['all'] = $list;
             MailerController::sendEmail($mailer, $user, $options);

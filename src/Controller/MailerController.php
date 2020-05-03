@@ -31,16 +31,16 @@ class MailerController extends AbstractController
   public static function sendEmail(MailerInterface $mailer, User $user, $options = null)
   {
 
-    if ($options == null) {
+    if ($options == null || isset($options['confirm']) && $options['confirm'] == 'yes') {
       $options['from'] = null;
       $options['object'] = null;
       $options['context'] = null;
       $options['template'] = null;
       $options['email'] = null;
       $options['all'] = null;
-      $options['confirm'] = null;
+      // $options['confirm'] = null;
     }
-
+    
     if (isset($options['confirm']) && $options['confirm'] != null && $options['confirm'] == 'yes') {
       //generate authentification key and store it in cache
       $id = $user->getId();
@@ -50,7 +50,7 @@ class MailerController extends AbstractController
       $productsCount->set($vkey);
       $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
     }
-
+    
     //send email to confirm user email
     $email = (new TemplatedEmail())
       ->from(($options['from'] == null ? 'admin@admin.fr' : $options['from']))

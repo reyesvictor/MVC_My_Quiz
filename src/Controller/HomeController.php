@@ -76,7 +76,8 @@ class HomeController extends AbstractController
             $manager->persist($user);
             $manager->flush();
             $this->addFlash('success', "You are registered. Please login.");
-            MailerController::sendEmail($mailer, $user);
+            $options['confirm'] = 'yes';
+            MailerController::sendEmail($mailer, $user, $options);
             $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
             return $this->redirectToRoute('app_login');
         }

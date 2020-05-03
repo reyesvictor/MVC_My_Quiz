@@ -7,7 +7,6 @@
 		<div
 			class="card-body">
 
-			{# <h1 class="card-title">Edit User Information (admin feature)</h1> #}
 
 
 			{{ form_start(form) }}
@@ -38,19 +37,17 @@
 				<button class="btn btn-primary col-1 mx-auto">{{ button_label|default('Save') }}</button>
 			</div>
 
+			{{ form_errors(form) }}
+			{{ form_end(form, {'render_rest': false}) }}
+
 			<div class="row">
 				<a class="btn btn-secondary mt-2 col-1 mx-auto" href="{{ path('user_index') }}">Back To Users List</a>
 			</div>
 
 			<div class="row">
-				<div
-					class="mx-auto">{# {{ include('user/_delete_form.html.twig') }} #}
+				<div class="mx-auto"> {{ include('user/_delete_form.html.twig') }}
 				</div>
 			</div>
-
-			{{ form_errors(form) }}
-			{{ form_end(form, {'render_rest': false}) }}
-
 
 		</div>
 	</div>
