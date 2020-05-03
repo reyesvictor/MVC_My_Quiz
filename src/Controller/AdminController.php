@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Quiz;
 use App\Entity\User;
+use App\Entity\Historic;
 use App\Controller\HomeController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
@@ -36,6 +37,17 @@ class AdminController extends AbstractController
         $cache = new FilesystemAdapter();
         $visitors = $cache->getItem('visitors');
 
+
+        // dd($this->getDoctrine()->getRepository(Historic::class)->findAll());
+        if (count($this->getDoctrine()->getRepository(Historic::class)->findAll()) == 0) {
+            $q_day = 0;
+        }
+        foreach ($this->getDoctrine()->getRepository(Historic::class)->findAll() as $historic) {
+            if ((strtotime($historic->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
+                $items[$user->getEmail()] = $user->getName();
+            }
+        }
+
         return $this->render('admin/index.html.twig', [
             'controller_name' => 'AdminController',
             'form' => '_form_select',
@@ -43,6 +55,7 @@ class AdminController extends AbstractController
             'value0' => '--Users--',
             'items' => $this->items,
             'path' => "send_email",
+            'q_day' => $q_day,
         ]);
     }
 
@@ -116,6 +129,7 @@ class AdminController extends AbstractController
                 }
             }
             $email_cache->set('zero');
+            $path = 'send_email2';
             $form = '_form_select';
         } else if ($index == 1) {
             foreach ($this->getDoctrine()->getRepository(Quiz::class)->findAll() as $key => $quiz) {
@@ -132,26 +146,40 @@ class AdminController extends AbstractController
                 $email_cache->set('one');
             }
             $items =  array_combine(array_values(array_unique($list)), (array_unique($list)));
+
             $cache->save($email_cache);
             $path = 'send_email2';
             $form = '_form_select';
             // dd($list, array_values(array_unique($list)));
             // $all_quiz = $this->getDoctrine()->getRepository(Quiz::class)->findAll();
         } else if ($index == 2) {
-            foreach ($this->getDoctrine()->getRepository(User::class)->findAll() as $key2 => $user) {
+            $allMails = '';
+            $all = $this->getDoctrine()->getRepository(User::class)->findAll();
+            foreach ($all as $key => $user) {
                 if ($user->getLastConnectedAt() != null && !in_array($user->getName(), $forbidden_names)) {
                     if ((strtotime($user->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) > 0) {
                         $items[$user->getEmail()] = $user->getName();
+                        if (array_key_last($all) == $key) {
+                            $allMails .= $user->getEmail();
+                        } else {
+                            $allMails .= $user->getEmail() . '|';
+                        }
                     }
                 }
             }
             $path = 'send_email3';
             $form = '_form_mail';
         } else if ($index == 3) {
+            $allMails = '';
             foreach ($this->getDoctrine()->getRepository(User::class)->findAll() as $key2 => $user) {
                 if ($user->getLastConnectedAt() != null && !in_array($user->getName(), $forbidden_names)) {
                     if ((strtotime($user->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
                         $items[$user->getEmail()] = $user->getName();
+                        if (array_key_last($all) == $key) {
+                            $allMails .= $user->getEmail();
+                        } else {
+                            $allMails .= $user->getEmail() . '|';
+                        }
                     }
                 }
             }
@@ -159,6 +187,14 @@ class AdminController extends AbstractController
             $form = '_form_mail';
         }
 
+        if (count($items) > 1 && isset($allMails)) {
+            $items[$allMails] = 'Send to all group';
+        }
+
+        if (count($items) == 0) {
+            $this->addFlash('info', 'There are no users for this filter');
+            return $this->redirectToRoute('admin_index');
+        }
 
         return $this->render('admin/send_email.html.twig', [
             'controller_name' => 'AdminController',
@@ -191,9 +227,15 @@ class AdminController extends AbstractController
             $quiz_name = $request->request->all()['filter'];
             $target = 'Users that played' . $quiz_name;
             $items = [];
+            $allMails = '';
             foreach ($this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name)[0]->getHistorics() as $key => $historic) {
                 if ($historic->getUserId()->getName() !== 'Anonymous') {
                     $items[$historic->getUserId()->getEmail()] = $historic->getUserId()->getName() . " : " . $historic->getUserId()->getEmail();
+                    if (array_key_last($this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name)[0]->getHistorics()) == $key) {
+                        $allMails .= $historic->getUserId()->getEmail();
+                    } else {
+                        $allMails .= $historic->getUserId()->getEmail() . '|';
+                    }
                 }
             }
         } else if ($mail_cache_val == 'one') {
@@ -213,11 +255,23 @@ class AdminController extends AbstractController
                     }
                 }
             }
-            foreach ($list as $user_name) {
+            $allMails = '';
+            foreach ($list as $key => $user_name) {
                 $user = $this->getDoctrine()->getRepository(User::class)->findByName($user_name)[0];
+                if (array_key_last($list) == $key) {
+                    $allMails .= $user->getEmail();
+                } else {
+                    $allMails .= $user->getEmail() . '|';
+                }
                 $items[$user->getEmail()] = $user_name;
             }
         }
+
+        if (count($items) > 1 && isset($allMails)) {
+            $items[$allMails] = 'Send to all group';
+        }
+
+        // dd($items, $allMails);
 
         return $this->render('admin/send_email.html.twig', [
             'target' => $target,
@@ -245,9 +299,6 @@ class AdminController extends AbstractController
         $email = $request->request->all()['filter'];
         $object = $request->request->all()['object'];
         $content = $request->request->all()['content'];
-
-        $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($email)[0];
-        $name = $user->getName();
         $options = [
             'template' => 'admin_send_email',
             'from' => $this->getUser()->getEmail(),
@@ -257,7 +308,22 @@ class AdminController extends AbstractController
             ]
         ];
 
-        MailerController::sendEmail($mailer, $user, $options);
+        // dd($email, $request->request->all(), preg_match('/\|/', $email),);
+        if (preg_match('/\|/', $email)) {
+            $list = explode('|', $email);
+            // foreach ($list as $mail) {
+            //     $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($mail)[0];
+            //     MailerController::sendEmail($mailer, $user, $options);
+            //     sleep(2);
+            // }
+            $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($list[0])[0];
+            $options['all'] = $list;
+            MailerController::sendEmail($mailer, $user, $options);
+        } else {
+            $user = $this->getDoctrine()->getRepository(User::class)->findByEmail($email)[0];
+            MailerController::sendEmail($mailer, $user, $options);
+        }
+
 
         $this->addFlash('success', 'Email has been sent succesfully to ' . $email);
         return $this->redirectToRoute('admin_index');

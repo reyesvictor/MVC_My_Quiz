@@ -36,6 +36,8 @@ class MailerController extends AbstractController
       $options['object'] = null;
       $options['context'] = null;
       $options['template'] = null;
+      $options['email'] = null;
+      $options['all'] = null;
     }
     //generate authentification key and store it in cache
     $id = $user->getId();
@@ -48,7 +50,6 @@ class MailerController extends AbstractController
     //send email to confirm user email
     $email = (new TemplatedEmail())
       ->from(($options['from'] == null ? 'admin@admin.fr' : $options['from']))
-      ->to(new Address($user->getEmail()))
       ->subject(($options['object'] == null ? 'Thanks for signing up!' : $options['object']))
       ->htmlTemplate('mail/' . ($options['template'] == null ? 'confirm_email' : $options['template']) . '.html.twig')
       ->context(($options['context'] == null ? [
@@ -57,6 +58,13 @@ class MailerController extends AbstractController
         'id' => $id,
         'vkey' => $vkey,
       ] : $options['context'])); //content
+        if (!isset($options['all']) ) {
+          $email->to(new Address($user->getEmail()));
+        } else if ( $options['all'] != null && count($options['all']) > 1 ) {
+          foreach ($options['all'] as $mel) {
+            $email->addTo($mel);
+          }
+        }
     $mailer->send($email);
     return true;
 

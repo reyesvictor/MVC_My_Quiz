@@ -4,9 +4,9 @@
 {% endblock %}
 
 {% block body %}
-		<div class="card mb-2 col-4 mx-auto">
-			<div class="card-body">
-				<h1 class="card-title h3 mb-3 font-weight-normal">Send email to "{{ target }}"</h3>
+	<div class="card mb-2 col-4 mx-auto">
+		<div class="card-body">
+			<h1 class="card-title h3 mb-3 font-weight-normal">Send email to "{{ target }}"</h3>
 
 			{{ include('admin/' ~ form ~'.html.twig') }}
 
@@ -14,3 +14,4 @@
 	</div>
 	{% if app.user is defined and app.user is not null %}{% endif %}
 {% endblock %}
+	
