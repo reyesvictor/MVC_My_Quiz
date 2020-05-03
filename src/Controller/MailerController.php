@@ -38,14 +38,18 @@ class MailerController extends AbstractController
       $options['template'] = null;
       $options['email'] = null;
       $options['all'] = null;
+      $options['confirm'] = null;
     }
-    //generate authentification key and store it in cache
-    $id = $user->getId();
-    $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
-    $cache = new FilesystemAdapter();
-    $productsCount = $cache->getItem('key.verification.' . $id);
-    $productsCount->set($vkey);
-    $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
+
+    if (isset($options['confirm']) && $options['confirm'] != null && $options['confirm'] == 'yes') {
+      //generate authentification key and store it in cache
+      $id = $user->getId();
+      $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
+      $cache = new FilesystemAdapter();
+      $productsCount = $cache->getItem('key.verification.' . $id);
+      $productsCount->set($vkey);
+      $cache->save($productsCount); // ['key.verification.1' => 'encodedstring']
+    }
 
     //send email to confirm user email
     $email = (new TemplatedEmail())
@@ -58,13 +62,15 @@ class MailerController extends AbstractController
         'id' => $id,
         'vkey' => $vkey,
       ] : $options['context'])); //content
-        if (!isset($options['all']) ) {
-          $email->to(new Address($user->getEmail()));
-        } else if ( $options['all'] != null && count($options['all']) > 1 ) {
-          foreach ($options['all'] as $mel) {
-            $email->addTo($mel);
-          }
-        }
+
+
+    if (!isset($options['all'])) {
+      $email->to(new Address($user->getEmail()));
+    } else if ($options['all'] != null && count($options['all']) > 1) {
+      foreach ($options['all'] as $mel) {
+        $email->addTo($mel);
+      }
+    }
     $mailer->send($email);
     return true;
 

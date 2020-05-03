@@ -73,7 +73,8 @@ class UserController extends AbstractController
             }
             //if email of user is marked as verified by the admin, it will not send a message
             if (!$user->getEmailIsVerified()) {
-                MailerController::sendEmail($mailer, $user);
+                $options['confirm'] = 'yes';
+                MailerController::sendEmail($mailer, $user, $options);
                 $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
             } else {
                 $this->addFlash('info', "User with email '{$user->getEmail()}' is confirmed.");
@@ -125,7 +126,8 @@ class UserController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             if ($old_email != $new_email) { //si email differente envoyer mail confirmation
-                MailerController::sendEmail($mailer, $user);
+                $options['confirm'] = 'yes';
+                MailerController::sendEmail($mailer, $user, $options);
                 $user->setEmailIsVerified(0);
                 $em->persist($user);
                 $em->flush();
@@ -163,7 +165,8 @@ class UserController extends AbstractController
             if ($old_email == $new_email) {
                 $this->addFlash('warning', 'There are no changes for this user');
             } else {
-                MailerController::sendEmail($mailer, $user);
+                $options['confirm'] = 'yes';
+                MailerController::sendEmail($mailer, $user, $options);
                 $user->setEmailIsVerified(0);
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($user);
@@ -251,7 +254,8 @@ class UserController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'User information has been updated.');
             if ($send_email) {
-                MailerController::sendEmail($mailer, $user);
+                $options['confirm'] = 'yes';
+                MailerController::sendEmail($mailer, $user, $options);
             }
             if ($main_modification) {
                 $this->addFlash('success', 'You need to log again to see the changes.');

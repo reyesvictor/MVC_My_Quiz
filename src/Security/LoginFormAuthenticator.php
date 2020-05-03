@@ -111,6 +111,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $id = $token->getUser()->getId();
         $cache = new FilesystemAdapter();
         $productsCount = $cache->getItem('key.verification.' . $id);
+        // dd($productsCount->isHit(), $token->getUser()->getEmailIsVerified(), 'ok', $cache->getItem('key.verification.' . $id));
         if ($productsCount->isHit() || $token->getUser()->getEmailIsVerified() == false) { //if cache exists or user is marked as not registered, user isnt verified
             $session = new Session();
             $session->getFlashbag()->add('warning', 'Check your mails. You need to verify your email to log in.');

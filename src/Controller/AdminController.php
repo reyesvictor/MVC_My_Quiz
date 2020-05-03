@@ -159,11 +159,7 @@ class AdminController extends AbstractController
                 if ($user->getLastConnectedAt() != null && !in_array($user->getName(), $forbidden_names)) {
                     if ((strtotime($user->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) > 0) {
                         $items[$user->getEmail()] = $user->getName();
-                        if (array_key_last($all) == $key) {
-                            $allMails .= $user->getEmail();
-                        } else {
-                            $allMails .= $user->getEmail() . '|';
-                        }
+                        $allMails .= $user->getEmail() . '|';
                     }
                 }
             }
@@ -175,11 +171,7 @@ class AdminController extends AbstractController
                 if ($user->getLastConnectedAt() != null && !in_array($user->getName(), $forbidden_names)) {
                     if ((strtotime($user->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
                         $items[$user->getEmail()] = $user->getName();
-                        if (array_key_last($all) == $key) {
-                            $allMails .= $user->getEmail();
-                        } else {
-                            $allMails .= $user->getEmail() . '|';
-                        }
+                        $allMails .= $user->getEmail() . '|';
                     }
                 }
             }
@@ -188,7 +180,7 @@ class AdminController extends AbstractController
         }
 
         if (count($items) > 1 && isset($allMails)) {
-            $items[$allMails] = 'Send to all group';
+            $items[substr($allMails, 0, -1)] = 'Send to all group';
         }
 
         if (count($items) == 0) {
