@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Category;
 use App\Form\UserRegisterType;
-use App\Controller\HomeController;
 use App\Controller\UserController;
 use Symfony\Component\Mime\Address;
 use App\Repository\CategoryRepository;
@@ -23,6 +22,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
@@ -41,10 +41,12 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="homepage")
      */
-    public function home(Request $request)
+    public function home(Request $request, TokenStorageInterface $token)
     {
+        // dd($token);
+        return $this->redirectToRoute('category_index');
         HomeController::countVisitors($request, $this->getUser());
-        return $this->render('home/index.html.twig', [
+        return $this->render('category/index.html.twig', [
             'controller_name' => 'HomeController',
         ]);
     }

@@ -19,7 +19,7 @@ class Historic
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="historics")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="historics", fetch="EAGER")
      */
     private $user;
 

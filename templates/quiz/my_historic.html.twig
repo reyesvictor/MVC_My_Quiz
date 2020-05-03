@@ -7,8 +7,8 @@
 	<div class="card mb-2">
 		<div class="card-body">
 			<h1 class="card-title">Historic Page of
-				{% if historics|length > 0 %}
-					{{ name }}</h1>
+				{{ name }}</h1>
+			{% if historics|length > 0 %}
 				<table class="table">
 					<thead>
 						<tr>
@@ -33,10 +33,10 @@
 						{% endfor %}
 					</tbody>
 				</table>
-			</div>
+			{% else %}
+				<p class='card-text'>No historic found</p>
+			{% endif %}
 		</div>
-	{% else %}
-		<p>No historic found</p>
-	{% endif %}
+	</div>
 
 {% endblock %}

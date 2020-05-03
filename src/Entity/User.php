@@ -91,7 +91,7 @@ class User implements UserInterface
     private $last_connected_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="user", cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="user", cascade={"remove"}, fetch="EAGER")
      */
     private $historics;
 
@@ -286,9 +286,14 @@ class User implements UserInterface
         return $this->last_connected_at;
     }
 
-    public function setLastConnectedAt()
+    public function setLastConnectedAt(?\DateTimeInterface $last_connected_at = null)
     {
-        $this->last_connected_at = new \DateTime('now');
+        if ($last_connected_at == null) {
+            $this->last_connected_at = new \DateTime('now');
+        } else {
+            $this->last_connected_at = $last_connected_at;
+        }
+        return $this;
     }
 
     /**
@@ -361,14 +366,14 @@ class User implements UserInterface
     public function getRoles()
     {
         //Return only string with role titles (from the database) so it is available for Symfony.
-        $roles = $this->UserRoles->map(function($role) {
+        $roles = $this->UserRoles->map(function ($role) {
             return $role->getTitle();
         })->toArray();
 
         // if ( $this->is_admin ) {
         //     $roles[] = 'ROLE_ADMIN';
         // }
-        
+
         $roles[] = 'ROLE_USER'; //add this so it is by default
         // dd($roles);
         return $roles;

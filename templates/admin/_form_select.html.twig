@@ -1,0 +1,16 @@
+<form method="post" action="{{ path( path )}}">
+	<div class='row'>	
+	<label for="select" class='mx-auto'>Choose a filter:</label>
+	</div>
+	<div class='row'>	
+		<select class='form-control mx-auto' name="filter" style="width: auto;">
+			<option value="">{{value0}}</option>
+			{% for key, item in items %}
+				<option value="{{key}}">{{item}}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class='row'>
+		<button class="btn btn-info mt-2 col-4 mx-auto">Send</button>
+	</div>
+</form>

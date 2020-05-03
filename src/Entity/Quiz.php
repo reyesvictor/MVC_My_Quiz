@@ -57,7 +57,7 @@ class Quiz
     private $updated_at;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Historic", mappedBy="quiz", orphanRemoval=true, cascade={"remove"}, cascade={"persist"}, fetch="EAGER")
      */
     private $historics;
 

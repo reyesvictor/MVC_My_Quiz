@@ -100,7 +100,6 @@ class AppFixtures extends Fixture
             $pwd_hashed = $this->encoder->encodePassword($user, 'root');
             if ($i == 0 || $i == 1 || $i == 2) {
                 if ($i == 0) {
-
                     $adminRole = new Role();
                     $adminRole->setTitle('ROLE_ADMIN');
                     $manager->persist($adminRole);
@@ -111,7 +110,13 @@ class AppFixtures extends Fixture
                 }
             }
             $user->setEmailIsVerified(1);
-            $user->setEmailVerifiedAt(new \DateTime('now'));
+            if ($users_arr[$i] == "Catherine deMedicis") {
+                $user->setEmailVerifiedAt(new \DateTime('1558-01-01'))
+                ->setLastConnectedAt(new \DateTime('1560-01-01'));
+            } else {
+                $user->setEmailVerifiedAt(new \DateTime('now'));
+            }
+            
             if (preg_match('/\ /', $users_arr[$i])) {
                 $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])) . '.fr');
             } else {
@@ -152,7 +157,6 @@ class AppFixtures extends Fixture
             if ($vKey->isHit()) {
                 $cache->deleteItem('key.verification.' . $i);
             }
-            
         }
         //delete visitors count
         $visitors = $cache->getItem('visitors');

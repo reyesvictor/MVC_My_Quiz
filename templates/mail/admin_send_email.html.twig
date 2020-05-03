@@ -70,24 +70,6 @@
 	}
 </style>
 
+{{content}}
 
-<h1>Welcome
-	{{ username }}
-	!</h1>
-
-<p>
-	You signed up 
-		with this mail:
-</p>
-<p>
-	<code>{{ email.to[0].address }}</code>
-</p>
-<p>You need to confirm your email to validate your account:
-</p>
-
-<a href="https://127.0.0.1:8000/verify/{{ id }}/{{ vkey }}" class="btn btn-default">Confirm my email</a>
-
-<p>After this you can log in, create your quizzes, see your historic and more !</p>
-
-<!-- <p>  (this link is valid until {{ expiration_date|date('F jS') }})</p> -->
 {% endapply %}

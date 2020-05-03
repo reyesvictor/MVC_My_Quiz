@@ -204,26 +204,16 @@ class UserController extends AbstractController
             $new_isverified = $user->getEmailIsVerified();
             $new_isadmin = $user->getIsAdmin();
             $main_modification = false;
+            $send_email = false;
+            $em = $this->getDoctrine()->getManager();
 
             if ($old_email == $new_email && $old_name == $new_name && $old_isverified == $new_isverified && $old_isadmin == $new_isadmin) {
                 $this->addFlash('warning', 'There are no changes');
                 return $this->redirect($request->getUri());
             }
 
-            // dd($old_email, $new_email, $old_name, $new_name, $old_isverified, $new_isverified, $old_isadmin, $new_isadmin);
-            // $this->getDoctrine()->getManager()->flush();
-            $this->addFlash('success', 'User information has been updated.');
-            $em = $this->getDoctrine()->getManager();
-            $old_user = $this->getDoctrine()->getRepository(User::class)->findById($user->getId())[0];
-
-            // $em->flush();
             if ($old_email != $new_email) {
-                // $user->setEmailVerifiedAt(NULL);
-                // $user->setEmailIsVerified(0);
-                //envoi email
-                MailerController::sendEmail($mailer, $user);
-                // $em = $this->getDoctrine()->getManager();
-                // $em->persist($user);
+                $send_email = true;
                 if ($this->getUser() === $user) {
                     $main_modification = true;
                 } else {
@@ -231,19 +221,11 @@ class UserController extends AbstractController
                 }
             }
 
-
             if ($old_isverified != $new_isverified && $new_isverified == true) {
                 $user->setEmailVerifiedAt(new \DateTime('now'));
-                // $user->setEmailIsVerified(1);
-                // $em->persist($user);
-                // $em->flush();
             } else if ($old_isverified != $new_isverified && $new_isverified == false) {
                 $user->setEmailVerifiedAt(NULL);
-                // $user->setEmailIsVerified(0);
-                //envoi email
-                MailerController::sendEmail($mailer, $user);
-                // $em = $this->getDoctrine()->getManager();
-                // $em->persist($user);
+                $send_email = true;
                 if ($this->getUser()->getId() === $user->getId()) {
                     $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in again.");
                     $session = new Session();
@@ -252,7 +234,6 @@ class UserController extends AbstractController
                 } else {
                     $this->addFlash('info', "An email has been sent to the user {$user->getEmail()}. He needs to confirm his mail to log in.");
                 }
-                // $em->persist($user);
             }
 
             if ($old_isadmin != $new_isadmin && $new_isadmin == true) { // si cette valeur a été modifiée
@@ -268,59 +249,16 @@ class UserController extends AbstractController
             }
 
             $em->flush();
+            $this->addFlash('success', 'User information has been updated.');
+            if ($send_email) {
+                MailerController::sendEmail($mailer, $user);
+            }
             if ($main_modification) {
                 $this->addFlash('success', 'You need to log again to see the changes.');
                 return $this->redirectToRoute('app_logout');
             }
-
-            // if (isset($request->request->get('user')['email_is_verified'])) {
-            //     $user->setEmailVerifiedAt(new \DateTime('now'));
-            //     $em->persist($user);
-            //     $em->flush();
-            // } else if ($user->getEmailIsVerified() == false) { //erase time of verification if email is not verified (changed by Admin)
-            //     // dd('test');
-            //     MailerController::sendEmail($mailer, $user);
-            //     $this->addFlash('info', "An email has been sent to the user {$user->getEmail()}. He needs to confirm his email to log in.");
-            //     $marker = false;
-            //     $user->setEmailVerifiedAt();
-            //     $em->persist($user);
-            //     $em->flush();
-            // }
-
-            // //si cest ladmin
-            // if ($old_user->getIsAdmin() !== $user->getIsAdmin()) { // si cette valeur a été modifiée
-            //     if ($user->getIsAdmin()) { // et si l'user est admin lui ajouter les droits
-            //         $this->addAdminRole($user, $em);
-            //         if ($this->getUser() === $user) {
-            //             $this->addFlash('success', 'You need to log again to see the changes.');
-            //             return $this->redirectToRoute('logout');
-            //         }
-            //     } else { //sinon enlever les droits
-            //         $this->removeAdminRole($user, $em);
-            //         if ($this->getUser() === $user) {
-            //             $this->addFlash('success', 'You need to log again to see the changes.');
-            //             return $this->redirectToRoute('app_logout');
-            //         }
-            //     }
-            // }
-
-            // dd($old_email, $new_email, $this->getUser() === $user);
-
-            // if ($old_email != $new_email) { //si email differente envoyer mail confirmation
-            //     MailerController::sendEmail($mailer, $user);
-            //     $user->setEmailIsVerified(0);
-            //     $em->persist($user);
-            //     $em->flush();
-            //     if ($this->getUser() === $user) {
-            //         $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in again.");
-            //         return $this->redirectToRoute('app_logout');
-            //     } else {
-            //         $this->addFlash('info', "An email has been sent to the user {$user->getEmail()}. He needs to confirm his mail to log in.");
-            //     }
-            // }
             return $this->redirect($request->getUri());
         }
-
         return $this->render("admin/edit_user.html.twig", [
             'user' => $user,
             'form' => $form->createView(),

@@ -4,23 +4,11 @@
 {% endblock %}
 
 {% block body %}
-	<div class="card mb-2">
-		<div class="card-body">
-			<h1 class="card-title">Send Email</h1>
+		<div class="card mb-2 col-4 mx-auto">
+			<div class="card-body">
+				<h1 class="card-title h3 mb-3 font-weight-normal">Send email to "{{ target }}"</h3>
 
-			<form method="post" action="{{ path('send_email') }}">
-				<label for="pet-select">Choose a filter:</label>
-				<select name="pets" id="pet-select">
-					<option value="">--Please choose an option--</option>
-					<option value="dog">Dog</option>
-					<option value="cat">Cat</option>
-					<option value="hamster">Hamster</option>
-					<option value="parrot">Parrot</option>
-					<option value="spider">Spider</option>
-					<option value="goldfish">Goldfish</option>
-				</select>
-				<button class="btn btn-danger mt-2">Send</button>
-			</form>
+			{{ include('admin/' ~ form ~'.html.twig') }}
 
 		</div>
 	</div>

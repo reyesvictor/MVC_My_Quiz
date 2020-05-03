@@ -28,8 +28,15 @@ class MailerController extends AbstractController
    * @param MailerInterface $mailer
   //  * @return Response
    */
-  public static function sendEmail(MailerInterface $mailer, User $user)
+  public static function sendEmail(MailerInterface $mailer, User $user, $options = null)
   {
+
+    if ($options == null) {
+      $options['from'] = null;
+      $options['object'] = null;
+      $options['context'] = null;
+      $options['template'] = null;
+    }
     //generate authentification key and store it in cache
     $id = $user->getId();
     $vkey = md5((new \DateTime('now'))->format('Y-m-d H:i:s') . $id);
@@ -40,16 +47,16 @@ class MailerController extends AbstractController
 
     //send email to confirm user email
     $email = (new TemplatedEmail())
-      ->from('admin@admin.fr')
+      ->from(($options['from'] == null ? 'admin@admin.fr' : $options['from']))
       ->to(new Address($user->getEmail()))
-      ->subject('Thanks for signing up!')
-      ->htmlTemplate('mail/confirm_email.html.twig')
-      ->context([
+      ->subject(($options['object'] == null ? 'Thanks for signing up!' : $options['object']))
+      ->htmlTemplate('mail/' . ($options['template'] == null ? 'confirm_email' : $options['template']) . '.html.twig')
+      ->context(($options['context'] == null ? [
         'expiration_date' => new \DateTime('+7 days'),
         'username' => $user->getName(),
         'id' => $id,
         'vkey' => $vkey,
-      ]);
+      ] : $options['context'])); //content
     $mailer->send($email);
     return true;
 

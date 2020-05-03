@@ -1,0 +1,26 @@
+<form method="post" action="{{ path( path )}}" id="theform">
+	<label for="select">Choose a filter:</label>
+	<div class='row'>
+		<select class="form-control" name="filter">
+			<option value="">{{value0}}</option>
+			{% for key, item in items %}
+				<option value="{{key}}">{{item}}</option>
+			{% endfor %}
+		</select>
+	</div>
+
+	<div class='row'>
+		<label for="fobject">Object</label><br>
+		<input class="form-control" type="text" name="object" value="News for you !"><br>
+	</div>
+	<div class='row'>
+		<label for="fcontent">Content</label><br>
+		{# <input class="form-control" type="textarea" name="content"> #}
+	</div>
+
+<textarea  class="form-control"  name="content" form="theform">Hello dear user of our website, we have news for you: </textarea>
+
+	<div class='row'>
+		<button class="btn btn-info mt-2 col-4 mx-auto">Send</button>
+	</div>
+</form>

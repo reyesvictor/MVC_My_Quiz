@@ -38,17 +38,7 @@
 				<div class="card bg-light mb-3 mr-3" style="max-width: 30rem;">
 					<div class="card-header">Send Email</div>
 					<div class="card-body">
-						<form method="post" action="{{ path('send_email') }}">
-							<label for="pet-select">Choose a filter:</label>
-								<select name="filter">
-									<option value="">--Users--</option>
-									<option value="cat">• Qui ont passé un ou plusieurs quiz en particulier.</option>
-									<option value="hamster">• Qui n’ont pas passé un ou plusieurs quiz en particulier.</option>
-									<option value="parrot">• Qui se sont connecté au moins une fois depuis 1 mois.</option>
-									<option value="spider">• Qui ne se sont pas connecté au moins une fois depuis 1 mois.</option>
-								</select>
-							<button class="btn btn-info mt-2">Send</button>
-						</form>
+						{{ include('admin/_form_select.html.twig') }}
 					</div>
 				</div>
 
