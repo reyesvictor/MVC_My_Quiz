@@ -44,17 +44,27 @@ class QuizController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="quiz_new", methods={"GET","POST"})
+     * @Route("/new/", name="quiz_new", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER')", message="You can't create a quiz. Connect first !") 
      * 
      */
     // public function new(Request $request, ObjectManager $entityManager): Response
     public function new(Request $request): Response
     {
+        //if request post is empty
+        // dd($request->request->get('number'), $request->request);
+        if (($nbr = $request->request->get('number')) == null && $request->request->get('quiz') == null) {
+            //and number select is empty
+            if ($request->request->get('number') === "") {
+                $this->addFlash('warning',  'You need to select a number');
+            }
+            return $this->render('quiz/new_number.html.twig');
+        }
+
         //Passer un dernier param pour se servir de findAll dans QuizType
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
         $quiz = new Quiz();
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < $nbr; $i++) {
             $questions{
                 $i} = new Question();
             $questions{
@@ -81,7 +91,6 @@ class QuizController extends AbstractController
         $quiz->setName("Akira");
         $quiz->setData("Tetsuo, un adolescent...");
 
-
         if ($this->getUser() !== null) {
             $user = $this->getUser();
         } else {
@@ -92,10 +101,12 @@ class QuizController extends AbstractController
         // $question->setQuizId($quiz);
         $form = $this->createForm(QuizType::class, $quiz, [
             'get_category_repo' => $getRepo,
-            'quiz' => $quiz
+            'quiz' => $quiz,
         ]);
+
         //===============================================================
 
+        // dd($request);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -112,14 +123,10 @@ class QuizController extends AbstractController
 
             return $this->redirectToRoute('quiz_index');
         }
-
-        // dump($form->createView());
-        // exit();
-
-
         return $this->render('quiz/new.html.twig', [
             'quiz' => $quiz,
             'form' => $form->createView(),
+            'nbr' => $nbr,
         ]);
     }
 

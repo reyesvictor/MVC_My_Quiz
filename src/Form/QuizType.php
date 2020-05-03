@@ -76,10 +76,11 @@ class QuizType extends AbstractType
             ])
             ->add('questions', CollectionType::class, [
                 'entry_type' => QuestionType::class,
+                'allow_add' => true, //Allow more than 10 questions  
+                'by_reference' => false, //le parametre sauveur ? id_null cant flush    
                 'label' => 'Questions List',
                 // 'label_format' => 'form.questions.%name%',
                 'entry_options' => [
-
                     // 'questions' => $options['quiz']->getQuestions(),
                 ],
             ]);

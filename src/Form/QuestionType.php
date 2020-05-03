@@ -28,14 +28,14 @@ class QuestionType extends AbstractType
                         'max' => 50,
                         'minMessage' => 'You must enter a longer question',
                         'maxMessage' => 'You must enter a shorter question',
-                        ])
+                    ]),
                 ],
             ])
-            ->add('answers', CollectionType::class,[
+            ->add('answers', CollectionType::class, [
                 'entry_type' => AnswerType::class,
                 'label' => 'Answers',
-            ])
-        ;
+                'allow_add' => true, //Allow more than 10 questions 
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

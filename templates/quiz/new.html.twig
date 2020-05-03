@@ -10,8 +10,9 @@
 
 	<div class="card mb-2">
 		<div class="card-body">
-			<h1 class="card-title">Create new Quiz</h1>
-			<a class='btn btn-secondary mb-2' href="{{ path('quiz_index') }}">Back to List</a>
+			<h1 class="card-title">Create New Quiz of {{ nbr }} questions</h1>
+				<a class='btn btn-secondary mb-2 mr-2' href="{{ path('quiz_index') }}">Back to List</a>
+				<a class='btn btn-light mb-2' href="{{ path('quiz_new') }}">Change number of questions</a>
 
 			{{ include('quiz/_form.html.twig') }}
 

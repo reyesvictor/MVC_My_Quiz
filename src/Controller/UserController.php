@@ -124,7 +124,7 @@ class UserController extends AbstractController
             // dd($user)->getIsAdmin();
             $old_user_1 = $this->getDoctrine()->getRepository(User::class)->findById($user->getId())[0];
             $new_email = $this->getUser()->getEmail();
-
+            $marker = true;
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', 'User information has been updated.');
             $em = $this->getDoctrine()->getManager();
@@ -135,6 +135,10 @@ class UserController extends AbstractController
                 $em->persist($user);
                 $em->flush();
             } else if ($user->getEmailIsVerified() == false) { //erase time of verification if email is not verified (changed by Admin)
+                // dd('test');
+                MailerController::sendEmail($mailer, $user);
+                $this->addFlash('info', "An email has been sent to the user {$user->getEmail()}. He needs to confirm his email to log in.");
+                $marker = false;
                 $user->setEmailVerifiedAt();
                 $em->persist($user);
                 $em->flush();
@@ -155,13 +159,18 @@ class UserController extends AbstractController
                     }
                 }
             }
-            if ($old_email != $new_email) { //si email differente envoyer mail confirmation
+            if ($old_email != $new_email && $marker ) { //si email differente envoyer mail confirmation
                 MailerController::sendEmail($mailer, $user);
-                $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
                 $user->setEmailIsVerified(0);
                 $em->persist($user);
                 $em->flush();
-                return $this->redirectToRoute('app_logout');
+                if ($this->getUser() === $user) {
+                    $this->addFlash('info', "An email has been sent to you. Please confirm your mail to log in.");
+                    return $this->redirectToRoute('app_logout');
+                } else {
+
+                    $this->addFlash('info', "An email has been sent to the user {$user->getEmail()}. He needs to confirm his mail to log in.");
+                }
             }
             return $this->redirectToRoute('user_index');
         }
