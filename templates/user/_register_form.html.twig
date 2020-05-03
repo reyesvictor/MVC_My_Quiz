@@ -1,8 +1,8 @@
 {{ form_start(form) }}
 {# {{ form_widget(form) }} #}
 
-<div class="card text-black bg-light mb-3">
-	<div class="card-header">User Information</div>
+<div class="card text-black bg-light mb-3 col-4 mx-auto">
+	<div class="card-header">New User Form</div>
 	<div class="card-body">
 		{{ form_label(form.name)}}
 		{{ form_widget(form.name, {'attr': {'class':'form-control', 'value': user.name}  })  }}
@@ -15,15 +15,28 @@
 		{{ form_widget(form._token) }}
 	</div>
 </div>
-<div class="card text-white bg-warning mb-3">
-	<div class="card-header">User Information - For Admins Only</div>
-	<div class="card-body">
-		{{ form_label(form.email_is_verified)}}
-		{{ form_widget(form.email_is_verified, {'attr': {'value': user.emailIsVerified}  })  }}
-		{{ form_label(form.is_admin)}}
-		{{ form_widget(form.is_admin, {'attr': {'value': user.isAdmin}  })  }}
+
+{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+	<div class="card text-white bg-warning mb-3 col-4 mx-auto">
+		<div class="card-header">User Information - For Admins Only</div>
+		<div class="card-body">
+			{{ form_label(form.email_is_verified)}}
+			{{ form_widget(form.email_is_verified, {'attr': {'value': user.emailIsVerified}  })  }}
+			{{ form_label(form.is_admin)}}
+			{{ form_widget(form.is_admin, {'attr': {'value': user.isAdmin}  })  }}
+		</div>
 	</div>
+{% endif %}
+
+<div class="row">
+	<button class="btn btn-primary col-1 mx-auto">{{ button_label|default('Save') }}</button>
 </div>
-<button class="btn btn-primary">{{ button_label|default('Save') }}</button>
+
+{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+	<div class="row">
+		<a class="btn btn-secondary mt-2 col-1 mx-auto" href="{{ path('user_index') }}">Back To Users List</a>
+	</div>
+{% endif %}
+
 {{ form_errors(form) }}
 {{ form_end(form, {'render_rest': false}) }}

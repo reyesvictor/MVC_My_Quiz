@@ -1,0 +1,7 @@
+{% if app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles and (user.getName == 'admin' or user.getName == 'deletedUser' or user.getName == 'Anonymous' ) %}
+	<a class="btn btn-primary" href="{{ path('edit_special_admin', {'id': user.id}) }}">Edit Special Profile</a>
+{% elseif app.user is defined and app.user is not null and 'ROLE_ADMIN' in app.user.getRoles %}
+	<a class="btn btn-primary" href="{{ path('admin_edit_user', {'id': user.id}) }}">Edit Profile</a>
+{% else %}
+	<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
+{% endif %}

@@ -120,6 +120,10 @@ class HomeController extends AbstractController
     public function verifyUser(User $user, $vkey, ObjectManager $manager)
     {
         $id = $user->getId();
+        if ( $this->getUser() != null && $this->getUser()->getId() != $id) {
+            $this->addFlash('danger', 'Another user is connected, you can\'t confirm the email. Logout first of this account.');
+            return $this->redirectToRoute('homepage');
+        }
         $cache = new FilesystemAdapter();
         $productsCount = $cache->getItem('key.verification.' . $id);
         if ($productsCount->isHit()) { //if cache exists, user isnt verified

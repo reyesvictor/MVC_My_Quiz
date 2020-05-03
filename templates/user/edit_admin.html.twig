@@ -12,7 +12,7 @@
 	
 			{{ form_start(form) }}
 			<div class="card text-black bg-light mb-3">
-				<div class="card-header">Original Admin Information</div>
+				<div class="card-header">Original Admin / User (For this user only his email can be modified)</div>
 				<div class="card-body">
 					{{ form_label(form.email)}}
 					{{ form_widget(form.email, {'attr': {'class':'form-control', 'value': user.email}  })  }}

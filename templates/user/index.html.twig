@@ -42,7 +42,7 @@
 							<td>
 								<a class="btn btn-info" href="{{ path('user_show', {'id': user.id}) }}">Show</a>
 								{% if app.user is defined and app.user is not null and ('ROLE_ADMIN' in app.user.getRoles or app.user is same as(user) ) %}
-									<a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id}) }}">Edit Profile</a>
+									{{ include('user/_button_edit.html.twig') }}
 									<a class="btn btn-warning" href="{{ path('user_update_password', {'id': user.id}) }}">Edit Password</a>
 								{% endif %}
 							</td>
