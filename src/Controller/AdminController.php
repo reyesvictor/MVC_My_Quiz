@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use DateTime;
 use App\Entity\Quiz;
 use App\Entity\User;
 use App\Entity\Historic;
@@ -29,21 +30,27 @@ class AdminController extends AbstractController
      */
     public function index(Request $request)
     {
-
-        // • Qui ont passé un ou plusieurs quiz en particulier.
-
-        // $user = $this->get('security.token_storage')->getToken()->getSecret();
         HomeController::countVisitors($request, $this->getUser());
         $cache = new FilesystemAdapter();
         $visitors = $cache->getItem('visitors');
 
-
-        // dd($this->getDoctrine()->getRepository(Historic::class)->findAll());
         $q_day = 0;
+        $q_week = 0;
+        $q_month = 0;
+        $q_year = 0;
         if (count($this->getDoctrine()->getRepository(Historic::class)->findAll()) > 0) {
             foreach ($this->getDoctrine()->getRepository(Historic::class)->findAll() as $historic) {
-                if ((strtotime($historic->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
+                if ((strtotime($historic->getCreatedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) > 0) {
                     $q_day++;
+                }
+                if ((strtotime($historic->getCreatedAt()->format('Y-m-d H:i:s')) - strtotime("-7 day")) > 0) {
+                    $q_week++;
+                }
+                if ((strtotime($historic->getCreatedAt()->format('Y-m-d H:i:s')) - strtotime("-1 month")) > 0) {
+                    $q_month++;
+                }
+                if ((strtotime($historic->getCreatedAt()->format('Y-m-d H:i:s')) - strtotime("-1 year")) > 0) {
+                    $q_year++;
                 }
             }
         }
@@ -56,6 +63,9 @@ class AdminController extends AbstractController
             'items' => $this->items,
             'path' => "send_email",
             'q_day' => $q_day,
+            'q_week' => $q_week,
+            'q_month' => $q_month,
+            'q_year' => $q_year,
         ]);
     }
 

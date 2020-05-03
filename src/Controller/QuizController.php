@@ -415,6 +415,7 @@ class QuizController extends AbstractController
         $h->setUserId($user);
         $h->setQuizId($quiz);
         $h->setScore($score);
+        $h->setCreatedAt(new Datetime());
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($h);
         $entityManager->flush();

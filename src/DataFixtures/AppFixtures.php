@@ -8,6 +8,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Entity\Answer;
 use App\Entity\Category;
+use App\Entity\Historic;
 use App\Entity\Question;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -112,11 +113,11 @@ class AppFixtures extends Fixture
             $user->setEmailIsVerified(1);
             if ($users_arr[$i] == "Catherine deMedicis") {
                 $user->setEmailVerifiedAt(new \DateTime('1558-01-01'))
-                ->setLastConnectedAt(new \DateTime('1560-01-01'));
+                    ->setLastConnectedAt(new \DateTime('1560-01-01'));
             } else {
                 $user->setEmailVerifiedAt(new \DateTime('now'));
             }
-            
+
             if (preg_match('/\ /', $users_arr[$i])) {
                 $user->setEmail(str_replace(' ',  '@', strtolower($users_arr[$i])) . '.fr');
             } else {
@@ -127,6 +128,7 @@ class AppFixtures extends Fixture
                 ->setPassword($pwd_hashed);
             $manager->persist($user);
         }
+
         $manager->flush();
 
         // Dans la partie d’échec Harry Potter prend la place de :;Un fou;Une tour;Un pion
@@ -196,6 +198,26 @@ class AppFixtures extends Fixture
                         $manager->persist($question_obj);
                     }
                     $manager->persist($quiz_obj);
+                    for ($i = 1; $i <=   11; $i++) {
+                        $h = new Historic();
+                        $score = ($i - 1) . '/10';
+                        $h->setUserId($user);
+                        $h->setQuizId($quiz_obj);
+                        $h->setScore($score);
+                        $lastMonth = date("Y-m-d", strtotime("-$i weeks"));
+                        $h->setCreatedAt(new DateTime($lastMonth));
+                        $manager->persist($h);
+                    }
+                    for ($i = 0; $i <=7; $i++) {
+                        $h = new Historic();
+                        $score = ($i + 1) . '/10';
+                        $h->setUserId($user);
+                        $h->setQuizId($quiz_obj);
+                        $h->setScore($score);
+                        $lastDays = date("Y-m-d", strtotime("-$i days"));
+                        $h->setCreatedAt(new DateTime($lastDays));
+                        $manager->persist($h);
+                    }
                 }
             }
             $manager->persist($category_obj);

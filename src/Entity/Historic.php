@@ -120,15 +120,18 @@ class Historic
         return $this->created_at;
     }
 
-    /**
-     * @ORM\PrePersist
-     * 
-     * @return void
-     */
-    public function setCreatedAt()
+    // /**
+    //  * @ORM\PrePersist
+    //  * 
+    //  * @return void
+    //  */
+    public function setCreatedAt(?\DateTimeInterface $created_at = null)
     {
-        if (empty($this->created_at)) {
-            $this->created_at = new \DateTime();
+        if ($created_at == null && empty($this->created_at)) {
+            $this->created_at = new \DateTime('now');
+        } else {
+            $this->created_at = $created_at;
         }
+        return $this;
     }
 }
