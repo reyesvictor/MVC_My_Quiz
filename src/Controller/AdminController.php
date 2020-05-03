@@ -39,12 +39,12 @@ class AdminController extends AbstractController
 
 
         // dd($this->getDoctrine()->getRepository(Historic::class)->findAll());
-        if (count($this->getDoctrine()->getRepository(Historic::class)->findAll()) == 0) {
-            $q_day = 0;
-        }
-        foreach ($this->getDoctrine()->getRepository(Historic::class)->findAll() as $historic) {
-            if ((strtotime($historic->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
-                $items[$user->getEmail()] = $user->getName();
+        $q_day = 0;
+        if (count($this->getDoctrine()->getRepository(Historic::class)->findAll()) > 0) {
+            foreach ($this->getDoctrine()->getRepository(Historic::class)->findAll() as $historic) {
+                if ((strtotime($historic->getLastConnectedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) < 0) {
+                    $q_day++;
+                }
             }
         }
 
