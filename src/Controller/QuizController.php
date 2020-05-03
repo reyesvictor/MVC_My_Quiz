@@ -53,13 +53,26 @@ class QuizController extends AbstractController
     {
         //if request post is empty
         // dd($request->request->get('number'), $request->request);
-        if (($nbr = $request->request->get('number')) == null && $request->request->get('quiz') == null) {
+        if ($request->request->get('number') == null && $request->request->get('quiz') == null) {
             //and number select is empty
             if ($request->request->get('number') === "") {
                 $this->addFlash('warning',  'You need to select a number');
             }
             return $this->render('quiz/new_number.html.twig');
         }
+        $nbr = intval($request->request->get('number'));
+
+        // $cache = new FilesystemAdapter();
+        // $nbr_cache = $cache->getItem('nbr');
+        // if ( $nbr != null || $nbr != "" ) {
+        //     $nbr_cache->set($nbr);
+        //     $cache->save($nbr_cache);
+        // } else {
+        //     $nbr = $nbr_cache->get('value');
+        // }
+
+        // $nbr = 30;
+
 
         //Passer un dernier param pour se servir de findAll dans QuizType
         $getRepo =  $this->getDoctrine()->getRepository(Category::class);
@@ -114,6 +127,7 @@ class QuizController extends AbstractController
                 return $this->render('quiz/new.html.twig', [
                     'quiz' => $quiz,
                     'form' => $form->createView(),
+                    'nbr' => $nbr,
                 ]);
             }
             $entityManager = $this->getDoctrine()->getManager();
@@ -123,6 +137,7 @@ class QuizController extends AbstractController
 
             return $this->redirectToRoute('quiz_index');
         }
+
         return $this->render('quiz/new.html.twig', [
             'quiz' => $quiz,
             'form' => $form->createView(),

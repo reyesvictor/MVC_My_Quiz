@@ -40,6 +40,10 @@ class AppFixtures extends Fixture
         //         ]
         //     ]
         // ]
+
+        // Dans la partie d’échec Harry Potter prend la place de :;Un fou;Une tour;Un pion
+        // Quel est le mot de passe du bureau de Dumbledore ?;Sorbet Citron;Chocogrenouille;Dragées Surprise
+
         'Films' => [
             'Harry Potter' => [
                 'Dans la partie d’échec Harry Potter prend la place de :' => [
@@ -51,7 +55,47 @@ class AppFixtures extends Fixture
                     'Chocogrenouille' => false,
                     'Sorbet Citron' => true,
                     'Dragées Surprise' => false,
-                ]
+                ],
+                "Quel chiffre est écrit à l'avant du Poudlard Express ?" => [
+                    '5972' => true,
+                    '4732' => false,
+                    '6849' => false,
+                ],
+                "Avec qui Harry est-il interdit de jouer à vie au Quidditch par Ombrage ?" => [
+                    'George Weasley' => true,
+                    'Fred Weasley' => false,
+                    'Drago Malefoy' => false,
+                ],
+                "Sur quelle(s) main(s) Harry s\'écrit-il \"je ne dois pas dire de mensonge\" pendant ses retenues avec Ombrage ?" => [
+                    'La droite' => true,
+                    'La gauche' => false,
+                    'Les deux' => false,
+                ],
+                "Everard et Dilys sont :" => [
+                    'Deux directeurs de Poudlard' => true,
+                    'Deux amants célèbres de Poudlard' => false,
+                    'Deux préfets en chef' => false,
+                ],
+                "Quel est le prénom du professeur Gobe-Planche ?" => [
+                    'Wilhelmina' => true,
+                    'Libellia' => false,
+                    'Carlotta' => false,
+                ],
+                "Quel est le nom de jeune fille de Molly Weasley ?" => [
+                    'Prewett' => true,
+                    'Foist' => false,
+                    'Jugson' => false,
+                ],
+                "Lequel de ces Mangemorts n'était pas présent lors de l'invasion au ministère ?" => [
+                    'Rowle' => true,
+                    'Crabbe' => false,
+                    'Goyle' => false,
+                ],
+                "En quelle année sont morts les parents de Harry Potter ?" => [
+                    '1981' => true,
+                    '1982' => false,
+                    '1983' => false,
+                ],
             ],
         ],
         'Sigles' => [
@@ -94,6 +138,7 @@ class AppFixtures extends Fixture
             'Benoit Hamon',
             'Christine Boutin',
             'Catherine deMedicis',
+            'Bouddha',
         ];
 
         for ($i = 0; $i < count($users_arr); $i++) {
@@ -114,6 +159,9 @@ class AppFixtures extends Fixture
             if ($users_arr[$i] == "Catherine deMedicis") {
                 $user->setEmailVerifiedAt(new \DateTime('1558-01-01'))
                     ->setLastConnectedAt(new \DateTime('1560-01-01'));
+            } else if ($users_arr[$i] == "Bouddha") {
+                $user->setEmailVerifiedAt(new \DateTime('0001-01-01'))
+                    ->setLastConnectedAt(new \DateTime('0001-02-01'));
             } else {
                 $user->setEmailVerifiedAt(new \DateTime('now'));
             }
@@ -131,16 +179,6 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
-        // Dans la partie d’échec Harry Potter prend la place de :;Un fou;Une tour;Un pion
-        // Quel est le mot de passe du bureau de Dumbledore ?;Sorbet Citron;Chocogrenouille;Dragées Surprise
-        // Quel chiffre est écrit à l'avant du Poudlard Express ?;5972;4732;6849
-        // Avec qui Harry est-il interdit de jouer à vie au Quidditch par Ombrage ?;George Weasley;Fred Weasley;Drago Malefoy
-        // Sur quelle(s) main(s) Harry s'écrit-il "je ne dois pas dire de mensonge" pendant ses retenues avec Ombrage ?;La droite;La gauche;Les deux
-        // Everard et Dilys sont :;Deux directeurs de Poudlard;Deux amants célèbres de Poudlard;Deux préfets en chef
-        // Quel est le prénom du professeur Gobe-Planche ?;Wilhelmina;Libellia;Carlotta
-        // Quel est le nom de jeune fille de Molly Weasley ?;Prewett;Foist;Jugson
-        // Lequel de ces Mangemorts n'était pas présent lors de l'invasion au ministère ?;Rowle;Crabbe;Goyle
-        // En quelle année sont morts les parents de Harry Potter ?;1981;1982;1983
 
         //erase old cache
         $cache = new FilesystemAdapter();
@@ -208,7 +246,7 @@ class AppFixtures extends Fixture
                         $h->setCreatedAt(new DateTime($lastMonth));
                         $manager->persist($h);
                     }
-                    for ($i = 0; $i <=7; $i++) {
+                    for ($i = 0; $i <= 7; $i++) {
                         $h = new Historic();
                         $score = ($i + 1) . '/10';
                         $h->setUserId($user);

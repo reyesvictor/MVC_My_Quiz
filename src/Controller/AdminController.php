@@ -18,7 +18,7 @@ class AdminController extends AbstractController
 {
 
     private $items = [
-        "Qui ont joué un ou plusieurs quiz en particulier.",
+        "Qui ont joué à un quiz en particulier.",
         "Qui n’ont pas joué à un quiz particulier.",
         "Qui se sont connecté au moins une fois depuis 1 mois.",
         "Qui ne se sont pas connecté au moins une fois depuis 1 mois.",
@@ -139,6 +139,7 @@ class AdminController extends AbstractController
                 }
             }
             $email_cache->set('zero');
+            $cache->save($email_cache);
             $path = 'send_email2';
             $form = '_form_select';
         } else if ($index == 1) {
@@ -153,15 +154,13 @@ class AdminController extends AbstractController
                         }
                     }
                 }
-                $email_cache->set('one');
             }
+            $email_cache->set('one');
             $items =  array_combine(array_values(array_unique($list)), (array_unique($list)));
 
             $cache->save($email_cache);
             $path = 'send_email2';
             $form = '_form_select';
-            // dd($list, array_values(array_unique($list)));
-            // $all_quiz = $this->getDoctrine()->getRepository(Quiz::class)->findAll();
         } else if ($index == 2) {
             $allMails = '';
             $all = $this->getDoctrine()->getRepository(User::class)->findAll();
@@ -224,27 +223,36 @@ class AdminController extends AbstractController
         $email_cache = $cache->getItem('mail');
         $mail_cache_val = $email_cache->get('value');
         $value0 = '--Which User--';
+        $allMails = '';
 
         if ($mail_cache_val == 'zero') {
             $quiz_name = $request->request->all()['filter'];
-            $target = 'Users that played' . $quiz_name;
+            $target = 'Users that played ' . $quiz_name;
             $items = [];
-            $allMails = '';
-            foreach ($this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name)[0]->getHistorics() as $key => $historic) {
-                if ($historic->getUserId()->getName() !== 'Anonymous') {
-                    $items[$historic->getUserId()->getEmail()] = $historic->getUserId()->getName() . " : " . $historic->getUserId()->getEmail();
-                    if (array_key_last($this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name)[0]->getHistorics()) == $key) {
-                        $allMails .= $historic->getUserId()->getEmail();
-                    } else {
-                        $allMails .= $historic->getUserId()->getEmail() . '|';
+            $all = $this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name)[0]->getHistorics();
+            // dd($all, count($all));
+            if (count($all) == 1) {
+                $allMails = $all[0]->getUserId()->getEmail();
+                $items[$all[0]->getUserId()->getEmail()] = $all[0]->getUserId()->getName() . " : " . $all[0]->getUserId()->getEmail();
+            } else {
+                foreach ($all as $key => $historic) {
+                    if ($historic->getUserId()->getName() !== 'Anonymous') {
+                        $items[$historic->getUserId()->getEmail()] = $historic->getUserId()->getName() . " : " . $historic->getUserId()->getEmail();
+                        // $allMails .= $historic->getUserId()->getEmail() . '|';
+                        $list[$historic->getUserId()->getEmail()] = $historic->getUserId()->getEmail();
                     }
                 }
+                foreach ($list as $mail) {
+                    $allMails .= $mail . '|';
+                }
+                $allMails = substr($allMails, 0, -1);
             }
         } else if ($mail_cache_val == 'one') {
             $quiz_name = $request->request->all()['filter'];
             $target = 'Users that did not play ' . $quiz_name;
             $items = [];
             $forbidden_names = ['Anonymous', 'deletedUser'];
+
             foreach ($this->getDoctrine()->getRepository(Quiz::class)->findByName($quiz_name) as $key => $quiz) {
                 foreach ($this->getDoctrine()->getRepository(User::class)->findAll() as $key2 => $user) {
                     if (!in_array($user->getName(), $forbidden_names)) {
@@ -257,23 +265,22 @@ class AdminController extends AbstractController
                     }
                 }
             }
-            $allMails = '';
-            foreach ($list as $key => $user_name) {
+            if (count($list) == 1) {
                 $user = $this->getDoctrine()->getRepository(User::class)->findByName($user_name)[0];
-                if (array_key_last($list) == $key) {
-                    $allMails .= $user->getEmail();
-                } else {
+                $allMails .= $user->getEmail();
+            } else {
+                foreach ($list as $key => $user_name) {
+                    $user = $this->getDoctrine()->getRepository(User::class)->findByName($user_name)[0];
                     $allMails .= $user->getEmail() . '|';
+                    $items[$user->getEmail()] = $user_name;
                 }
-                $items[$user->getEmail()] = $user_name;
             }
         }
 
-        if (count($items) > 1 && isset($allMails)) {
+        $allMails = substr($allMails, 0, -1);
+        if (count($items) > 1) {
             $items[$allMails] = 'Send to all group';
         }
-
-        // dd($items, $allMails);
 
         return $this->render('admin/send_email.html.twig', [
             'target' => $target,
