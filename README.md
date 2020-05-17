@@ -7,6 +7,7 @@ Les questions doivent être posées les unes après les autres, les réponses s�
 
 NOTIONS _ _ _ _ _ _ _ _ _ _ _\
 Vous devez absolument aborder les notions suivantes avant la fin de ce projet :
+* Symfony Framework
 * Repositories Doctrine
 * Entities
 * Relations de models (one to many, many to many, etc.)
