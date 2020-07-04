@@ -38,8 +38,9 @@ class AdminController extends AbstractController
         $q_week = 0;
         $q_month = 0;
         $q_year = 0;
-        if (count($this->getDoctrine()->getRepository(Historic::class)->findAll()) > 0) {
-            foreach ($this->getDoctrine()->getRepository(Historic::class)->findAll() as $historic) {
+        $all = $this->getDoctrine()->getRepository(Historic::class)->findAll();
+        if (count($all) > 0) { //reference vers repository, le compter et le boucler
+            foreach ($all as $historic) {
                 if ((strtotime($historic->getCreatedAt()->format('Y-m-d H:i:s')) - strtotime("-1 day")) > 0) {
                     $q_day++;
                 }
@@ -149,7 +150,7 @@ class AdminController extends AbstractController
                         $list[$quiz->getName() . '-' .  $user->getName()] = $quiz->getName();
                         foreach ($user->getHistorics() as $key3 => $historic) {
                             if ($historic->getQuizId()->getName() == $quiz->getName()) {
-                                unset($list[$quiz->getName() . '-' .  $user->getName()]);
+                                unset($list[$quiz->getName() . '-' .  $user->getName()]); //array_diff à utiliser pour optimiser la vitesse
                             }
                         }
                     }
